@@ -14,7 +14,7 @@
 
 *Inspired by CRIS and IRCTC · Independent project*
 
-> **Version:** 1.1 | **Date:** 2026-10-11 | **Document ID:** SRIS-P1-GOV-002
+> **Version:** 1.2 | **Date:** 2026-10-12 | **Document ID:** SRIS-P1-GOV-002
 
 | Field              | Value                                                             |
 | ------------------ | ----------------------------------------------------------------- |
@@ -27,12 +27,12 @@
 | Document Type      | Standard Document                                                 |
 | Milestone          | Phase 1 Foundation                                                |
 | Classification     | Internal                                                          |
-| Version            | 1.1                                                               |
-| Date               | 2026-10-11                                                        |
+| Version            | 1.2                                                               |
+| Date               | 2026-10-12                                                        |
 | Author             | Koushal Jha, Lead Architect                                       |
 | Approved By        | Koushal Jha, Lead Architect                                       |
-| Approval Date      | 2026-10-11                                                        |
-| Supersedes         | Version 1.0 of this document                                      |
+| Approval Date      | 2026-10-12                                                        |
+| Supersedes         | Version 1.1 of this document                                      |
 | Related Documents  | See Appendix B                                                    |
 | Affiliation        | Independent · Not affiliated with CRIS, IRCTC, or Indian Railways |
 
@@ -393,7 +393,7 @@ The first mention in a section gives the ID and the title. Later mentions in the
 - The link text is the Document ID.
 - The link target is the file name defined in [Section 11.1](#111-source-markdown-naming).
 - A link to a section ends with the GitHub heading anchor of that section.
-- A document does not link to a file that does not exist yet. Use plain text for planned documents in Appendix B only.
+- Every Document ID in prose and in appendices is a hyperlink, whether the target file exists in the repository yet or not. The path follows the file-naming rules in [Section 11.1](#111-source-markdown-naming) and the wave-folder rules in [Section 11.3](#113-folder-structure). Links to files not yet committed resolve correctly once those files are committed.
 
 ### 6.3 Same-Wave and Other-Wave Paths
 
@@ -636,7 +636,7 @@ The review checklist has six checks. All six must pass before a document is appr
 | Metadata   | Does the table have the 17 fields, in order, and do its values match the metadata blockquote?                                    |
 | Structure  | Does the body follow [Section 5](#5-body-structure-standard)?                                                                    |
 | Vocabulary | Are all Priority and Tag values from [Section 9](#9-vocabulary-standards)?                                                       |
-| Links      | Does every link resolve to an existing file or anchor?                                                                           |
+| Links      | Does every Document ID in prose resolve to the correct relative path, whether the target file exists yet or not?                 |
 | Style      | Does the document follow [Section 10](#10-style-rules)?                                                                          |
 
 The sign-off steps are in [Section 8.2](#82-sign-off-procedure).
@@ -653,16 +653,17 @@ A document that replaces a different document cites that document in the citatio
 
 | Role           | Name        | Decision | Date       |
 | -------------- | ----------- | -------- | ---------- |
-| Lead Architect | Koushal Jha | Approved | 2026-10-11 |
+| Lead Architect | Koushal Jha | Approved | 2026-10-12 |
 
 ---
 
 ## Revision History
 
-| Version | Date       | Author      | Change                                                                                                                             |
-| ------- | ---------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| 1.0     | 2026-10-11 | Koushal Jha | Initial release.                                                                                                                   |
-| 1.1     | 2026-10-11 | Koushal Jha | Removed Status from the standard: badges, metadata table, metadata blockquote, vocabulary, lifecycle, templates, and Appendix B.  |
+| Version | Date       | Author      | Change                                                                                                                                                                            |
+| ------- | ---------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.0     | 2026-10-11 | Koushal Jha | Initial release.                                                                                                                                                                  |
+| 1.1     | 2026-10-11 | Koushal Jha | Removed Status from the standard: badges, metadata table, metadata blockquote, vocabulary, lifecycle, templates, and Appendix B.                                                  |
+| 1.2     | 2026-10-12 | Koushal Jha | Removed the rule that forbids linking to files that do not exist yet. Every Document ID is now a hyperlink, whether the target file is committed or planned. |
 
 ---
 
