@@ -37,26 +37,26 @@ Driven Design, contract-first development, and event-driven integration.
 | Full Form | Sarathi Railway Information System |
 | Team Codename | Project Sarathi |
 | Architecture | Polyglot Microservices (Hybrid) |
-| Research Area | Software Engineering & Distributed System |
+| Research Area | Software Engineering & Distributed Systems |
 | Group | G320 |
 | Institution | GLA University, Mathura, Uttar Pradesh |
 | Semester | VII — Final Year Major Project |
 | Duration | 01 October 2026 — 30 November 2026 |
-| Version | 1.0 |
+| Project Version | Phase 1 Foundation |
 
 ---
 
 ## Team
 
-| Name | Role |
-|------|------|
-| Koushal Jha | Lead Architect |
-| Chandra Shekhar Bansal | UI/UX Designer |
-| Harshvardhan | To be added |
-| Hitanshu Dhakrey | To be added |
-| Shivanshu Dhakrey | To be added |
+| Name | Role | Notes |
+|------|------|-------|
+| Koushal Jha | Lead Architect | Architecture, Backend, Database, Infrastructure |
+| Chandra Shekhar Bansal | UI/UX Designer | |
+| Harshvardhan | UI/UX | |
+| Hitanshu Dhakrey | Backend | Java |
+| Shivanshu Dhakrey | Backend | Node.js |
 
-Full team details: [docs/team.md](docs/team.md)
+Full team details: to be added later.
 
 ---
 
@@ -80,10 +80,12 @@ Source documents do not carry a version in the filename. Version
 information is stored inside each document and tracked by Git.
 
 Naming convention:
-Document ID>_<DocumentNameInPascalCase>.md
+
+`<Document ID>_<DocumentNameInPascalCase>.md`
 
 Example:
-SRIS-P1-ARCH-001_MicroservicesIdentification.md
+
+`SRIS-P1-ARCH-001_MicroservicesIdentification.md`
 
 
 ### Phase Deliverables (PDF)
@@ -92,17 +94,23 @@ PDFs are generated once at the end of each phase, when all documents
 in the phase are complete and approved. They are not produced during
 development.
 
-Two sets are generated per phase:
+Two sets are generated per phase. Each wave folder holds its own
+deliverables subfolder for that wave's individual PDFs. The phase
+folder holds the combined book.
 
-1. **Individual PDFs** — one per document
-   - Location: `deliverables/<phase-name>/individual/`
-   - Naming: `<Document ID>_<DocumentNameInPascalCase>_v<Version>.pdf`
-   - Example: `SRIS-P1-ARCH-001_MicroservicesIdentification_v1.0.pdf`
+1. **Individual PDFs** — one per document, stored inside the wave folder
+   of the document's own wave.
 
-2. **Combined Book PDF** — all documents in one file
-   - Location: `deliverables/<phase-name>/book/`
-   - Naming: `<Software>-<Phase>-Book_v<Version>.pdf`
-   - Example: `SRIS-Phase1-Foundation-Book_v1.0.pdf`
+   - Location: `docs/phase-1-foundation/wave-N-<wave-name>/deliverables/`
+   - Naming: `SRIS-P1-<CATEGORY>-<NNN>_<DocumentNameInPascalCase>_v<Version>.pdf`
+   - Example: `docs/phase-1-foundation/wave-2-architecture/deliverables/SRIS-P1-ARCH-001_MicroservicesIdentification_v1.1.pdf`
+
+2. **Combined Book PDF** — all 180 documents in one file, stored at the
+   phase folder.
+
+   - Location: `docs/phase-1-foundation/deliverables/`
+   - Naming: `SRIS-Phase1-Foundation-Book_v<Version>.pdf`
+   - Example: `docs/phase-1-foundation/deliverables/SRIS-Phase1-Foundation-Book_v1.0.pdf`
 
 ---
 
@@ -117,9 +125,10 @@ systems for learning and demonstration purposes only.
 
 ## Revision History
 
-| Version | Date | Author | Change |
-|---------|------|--------|--------|
-| 1.0 | 2026-10-10 | Koushal Jha | Initial release — project overview, team, documentation conventions |
+| Version | Date       | Author      | Change                                                                                                                                                          |
+| ------- | ---------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.0     | 2026-10-10 | Koushal Jha | Initial release — project overview, team, documentation conventions.                                                                                            |
+| 1.1     | 2026-10-11 | Koushal Jha | Aligned PDF deliverables with wave folder structure, fixed placeholder syntax, corrected research area, clarified version field, updated team roles and notes. |
 
 ---
 
