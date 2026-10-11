@@ -1,9 +1,8 @@
 <div align="center">
 
-![Status](https://img.shields.io/badge/Status-Done-2ea043?style=for-the-badge)
 ![Wave](https://img.shields.io/badge/Wave-0-0550AE?style=for-the-badge)
 ![Phase](https://img.shields.io/badge/Phase-1%20Foundation-6f42c1?style=for-the-badge)
-![Category](https://img.shields.io/badge/Category-Governance-6e7781?style=for-the-badge)
+![Category](https://img.shields.io/badge/Category-GOV-6e7781?style=for-the-badge)
 
 </div>
 
@@ -15,7 +14,7 @@
 
 *Inspired by CRIS and IRCTC · Independent project*
 
-> **Status:** Done | **Version:** 1.0 | **Date:** 2026-10-11 | **Document ID:** SRIS-P1-GOV-002
+> **Version:** 1.1 | **Date:** 2026-10-11 | **Document ID:** SRIS-P1-GOV-002
 
 | Field              | Value                                                             |
 | ------------------ | ----------------------------------------------------------------- |
@@ -28,13 +27,12 @@
 | Document Type      | Standard Document                                                 |
 | Milestone          | Phase 1 Foundation                                                |
 | Classification     | Internal                                                          |
-| Version            | 1.0                                                               |
+| Version            | 1.1                                                               |
 | Date               | 2026-10-11                                                        |
 | Author             | Koushal Jha, Lead Architect                                       |
-| Status             | Done                                                              |
 | Approved By        | Koushal Jha, Lead Architect                                       |
 | Approval Date      | 2026-10-11                                                        |
-| Supersedes         | None (first version)                                              |
+| Supersedes         | Version 1.0 of this document                                      |
 | Related Documents  | See Appendix B                                                    |
 | Affiliation        | Independent · Not affiliated with CRIS, IRCTC, or Indian Railways |
 
@@ -51,7 +49,7 @@
    - [2.2 Subtitle](#22-subtitle)
    - [2.3 Tagline](#23-tagline)
    - [2.4 Affiliation Line](#24-affiliation-line)
-   - [2.5 Status Blockquote](#25-status-blockquote)
+   - [2.5 Metadata Blockquote](#25-metadata-blockquote)
 3. [Metadata Table Standard](#3-metadata-table-standard)
    - [3.1 Field List](#31-field-list)
    - [3.2 Field Descriptions](#32-field-descriptions)
@@ -78,10 +76,9 @@
    - [8.1 Format](#81-format)
    - [8.2 Sign-off Procedure](#82-sign-off-procedure)
 9. [Vocabulary Standards](#9-vocabulary-standards)
-   - [9.1 Status Values](#91-status-values)
-   - [9.2 Priority Values](#92-priority-values)
-   - [9.3 Tag Values](#93-tag-values)
-   - [9.4 Exact Term Usage](#94-exact-term-usage)
+   - [9.1 Priority Values](#91-priority-values)
+   - [9.2 Tag Values](#92-tag-values)
+   - [9.3 Exact Term Usage](#93-exact-term-usage)
 10. [Style Rules](#10-style-rules)
     - [10.1 No Emojis](#101-no-emojis)
     - [10.2 No Marketing Language](#102-no-marketing-language)
@@ -95,9 +92,8 @@
     - [11.3 Folder Structure](#113-folder-structure)
     - [11.4 Naming Non-Conformance](#114-naming-non-conformance)
 12. [Document Lifecycle](#12-document-lifecycle)
-    - [12.1 Status Transitions](#121-status-transitions)
-    - [12.2 Approval Workflow](#122-approval-workflow)
-    - [12.3 Superseding Rules](#123-superseding-rules)
+    - [12.1 Approval Workflow](#121-approval-workflow)
+    - [12.2 Superseding Rules](#122-superseding-rules)
 13. [Approval](#13-approval)
 
 - [Revision History](#revision-history)
@@ -112,7 +108,7 @@
 
 This document defines the standard template for every Phase 1 document of SRIS (Sarathi Railway Information System). It fixes the header, metadata table, body structure, cross-reference format, revision history, approval block, vocabulary, style rules, and file naming.
 
-It also records two decisions that apply to all documents: the badge policy in [Section 4](#4-badge-policy) and the status and tag vocabulary in [Section 9](#9-vocabulary-standards). The documents it governs are listed in [SRIS-P1-GOV-001](./SRIS-P1-GOV-001_DocumentationIndexAndNavigationMap.md) — Documentation Index and Navigation Map.
+It also records two decisions that apply to all documents: the badge policy in [Section 4](#4-badge-policy) and the priority and tag vocabulary in [Section 9](#9-vocabulary-standards). The documents it governs are listed in [SRIS-P1-GOV-001](./SRIS-P1-GOV-001_DocumentationIndexAndNavigationMap.md) — Documentation Index and Navigation Map.
 
 ### 1.2 Scope
 
@@ -122,7 +118,7 @@ In scope:
 - Body structure, numbering, appendices, and table of contents.
 - Cross-references and relative links.
 - Revision history, versioning, approval, and lifecycle.
-- Vocabulary for status, priority, and tag values.
+- Vocabulary for priority and tag values.
 - Style rules, file naming, and folder rules.
 
 Out of scope:
@@ -142,7 +138,7 @@ Out of scope:
 
 ## 2. Document Header Standard
 
-Every document starts with the same header block. The elements appear in this order: badge block, title line, subtitle, tagline, affiliation line, status blockquote, and metadata table.
+Every document starts with the same header block. The elements appear in this order: badge block, title line, subtitle, tagline, affiliation line, metadata blockquote, and metadata table.
 
 ### 2.1 Title Line
 
@@ -160,16 +156,15 @@ The tagline is an italic line below the subtitle. It is identical in every docum
 
 The affiliation line is an italic line below the tagline: `*Inspired by CRIS and IRCTC · Independent project*`. It states that the project is independent. The full statement is in the Affiliation field of the metadata table.
 
-### 2.5 Status Blockquote
+### 2.5 Metadata Blockquote
 
-The status blockquote is one line below the affiliation line. Its Status, Version, Date, and Document ID values must equal the same fields in the metadata table.
+The metadata blockquote is one line below the affiliation line. Its Version, Date, and Document ID values must equal the same fields in the metadata table.
 
 The complete header template, including the badge block, is shown below.
 
 ```
 <div align="center">
 
-![Status](https://img.shields.io/badge/Status-<Status>-<StatusColor>?style=for-the-badge)
 ![Wave](https://img.shields.io/badge/Wave-<WaveNumber>-<WaveColor>?style=for-the-badge)
 ![Phase](https://img.shields.io/badge/Phase-1%20Foundation-6f42c1?style=for-the-badge)
 ![Category](https://img.shields.io/badge/Category-<Category>-<CategoryColor>?style=for-the-badge)
@@ -184,14 +179,14 @@ The complete header template, including the badge block, is shown below.
 
 *Inspired by CRIS and IRCTC · Independent project*
 
-> **Status:** <Status> | **Version:** <Version> | **Date:** <YYYY-MM-DD> | **Document ID:** <Document ID>
+> **Version:** <Version> | **Date:** <YYYY-MM-DD> | **Document ID:** <Document ID>
 ```
 
 ---
 
 ## 3. Metadata Table Standard
 
-The metadata table follows the status blockquote. It has two columns, Field and Value, and exactly 18 rows. A copy-paste template is in [Appendix A](#appendix-a-metadata-table-template).
+The metadata table follows the metadata blockquote. It has two columns, Field and Value, and exactly 17 rows. A copy-paste template is in [Appendix A](#appendix-a-metadata-table-template).
 
 ### 3.1 Field List
 
@@ -209,12 +204,11 @@ The metadata table follows the status blockquote. It has two columns, Field and 
 | 10  | Version            |
 | 11  | Date               |
 | 12  | Author             |
-| 13  | Status             |
-| 14  | Approved By        |
-| 15  | Approval Date      |
-| 16  | Supersedes         |
-| 17  | Related Documents  |
-| 18  | Affiliation        |
+| 13  | Approved By        |
+| 14  | Approval Date      |
+| 15  | Supersedes         |
+| 16  | Related Documents  |
+| 17  | Affiliation        |
 
 The fields appear in this order in every document. No field is optional and no field is added or removed.
 
@@ -234,10 +228,9 @@ The fields appear in this order in every document. No field is optional and no f
 | Version            | Version of the document content.              | `MAJOR.MINOR`, see [Section 7](#7-revision-history-standard).        |
 | Date               | Date of the current version.                  | `YYYY-MM-DD`.                                                        |
 | Author             | Person who wrote the document.                | Name, role.                                                          |
-| Status             | Lifecycle state.                              | One value from [Section 9.1](#91-status-values).                     |
 | Approved By        | Person who approved the document.             | Name, role. Pending until approval.                                  |
 | Approval Date      | Date of approval.                             | `YYYY-MM-DD`. Pending until approval.                                |
-| Supersedes         | Document or version that this one replaces.   | See [Section 12.3](#123-superseding-rules).                          |
+| Supersedes         | Document or version that this one replaces.   | See [Section 12.2](#122-superseding-rules).                          |
 | Related Documents  | Pointer to related documents.                 | See Appendix B.                                                      |
 | Affiliation        | Statement of independence.                    | Fixed text, as in [Appendix A](#appendix-a-metadata-table-template). |
 
@@ -248,9 +241,10 @@ Fixed values are copied exactly. They are the same in every document.
 - Field names use the exact spelling and order in [Section 3.1](#31-field-list).
 - Dates use the ISO 8601 format `YYYY-MM-DD`.
 - No cell is empty. Use Pending or None where a value does not exist yet.
-- The Status, Version, Date, and Document ID values equal the status blockquote and the badges.
+- The Version, Date, and Document ID values equal the metadata blockquote.
 - The table is pipe-aligned, as described in [Section 10.5](#105-table-formatting).
 - Metadata cells contain plain text and no links.
+- The metadata table does not carry a Status field. Live status is tracked in the Kanban board and the Blueprint dashboard, not in the document.
 
 ---
 
@@ -258,25 +252,24 @@ Fixed values are copied exactly. They are the same in every document.
 
 ### 4.1 Decision
 
-**Decision:** badges are required. Every Phase 1 document carries the four badges in [Section 4.2](#42-required-badges). There is no exemption.
+**Decision:** badges are required. Every Phase 1 document carries the three badges in [Section 4.2](#42-required-badges). There is no exemption.
 
-The badges carry DYNAMIC information that changes per document. This is deliberately different from the metadata table, which carries STATIC identity information. There is no duplication between badges and metadata. Each shows a different dimension of the document.
+The badges carry identity information that varies per document. The metadata table carries document identity. The two are complementary. Each shows a different dimension of the document.
 
-- Badges show: current Status, Wave number, Phase, Category.
+- Badges show: Wave number, Phase, Category.
 - Metadata shows: Title, Software, Version, Author, and other identity fields.
 
 ### 4.2 Required Badges
 
-| Badge    | Value                                    | Colour Mapping                                  | Rule                                |
-| -------- | ---------------------------------------- | ----------------------------------------------- | ----------------------------------- |
-| Status   | Not Started / In Progress / In Review / Done | Not Started `6e7781`, In Progress `d29922`, In Review `1f6feb`, Done `2ea043` | Updated whenever Status changes.    |
-| Wave     | Wave 0 to Wave 9                         | Fixed `0550AE`                                  | Fixed for the document's wave.      |
-| Phase    | 1 Foundation                             | Fixed `6f42c1`                                  | Fixed: Phase 1 Foundation.          |
-| Category | GOV / REQ / ARCH / DATA / API / UI / SEC / TEST / INF / OPS / PM / USR | Fixed `6e7781` | Fixed for the document's category.  |
+| Badge    | Value                                    | Colour Mapping | Rule                                |
+| -------- | ---------------------------------------- | -------------- | ----------------------------------- |
+| Wave     | Wave 0 to Wave 9                         | Fixed `0550AE` | Fixed for the document's wave.      |
+| Phase    | 1 Foundation                             | Fixed `6f42c1` | Fixed: Phase 1 Foundation.          |
+| Category | GOV / DEV / REQ / ARCH / DATA / API / UI / SEC / TEST / INF / OPS / PM / USR / NFR-HOLD / NOTES-AI | Fixed `6e7781` | Fixed for the document's category.  |
 
 The badge URL uses URL-encoded values. For example, `1%20Foundation` for the Phase badge.
 
-The badges are images loaded from shields.io. A document stays readable without them, because the same information appears in the status blockquote and the metadata table.
+The badges are images loaded from shields.io. A document stays readable without them.
 
 ### 4.3 Placement and Formatting
 
@@ -284,11 +277,10 @@ The badges are images loaded from shields.io. A document stays readable without 
 2. The block is wrapped in a centred `div`. This is the only HTML allowed in a document.
 3. A blank line follows the opening `div` and a blank line precedes the closing `div`.
 4. Each badge is one line of markdown. The alternative text is the badge label.
-5. The Status badge reflects the current Status field. It is updated whenever Status changes.
-6. The Wave badge uses the wave number (0 to 9) and the fixed blue colour.
-7. The Phase badge is the same in every Phase 1 document.
-8. The Category badge uses the document's category code (GOV, ARCH, etc.).
-9. The exact block is part of the header template in [Section 2.5](#25-status-blockquote).
+5. The Wave badge uses the wave number (0 to 9) and the fixed blue colour.
+6. The Phase badge is the same in every Phase 1 document.
+7. The Category badge uses the document's category code (GOV, ARCH, etc.).
+8. The exact block is part of the header template in [Section 2.5](#25-metadata-blockquote).
 
 ---
 
@@ -300,8 +292,8 @@ Every document has the elements below, in this order.
 
 | Order | Element                       | Rule                                                                                                              |
 | ----- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| 1     | Header block                  | Badges, title, subtitle, tagline, affiliation line, status blockquote ([Section 2](#2-document-header-standard)). |
-| 2     | Metadata table                | 18 fields ([Section 3](#3-metadata-table-standard)).                                                              |
+| 1     | Header block                  | Badges, title, subtitle, tagline, affiliation line, metadata blockquote ([Section 2](#2-document-header-standard)). |
+| 2     | Metadata table                | 17 fields ([Section 3](#3-metadata-table-standard)).                                                              |
 | 3     | Horizontal rule               | `---`                                                                                                             |
 | 4     | Table of Contents             | See [Section 5.4](#54-table-of-contents-formatting).                                                              |
 | 5     | Horizontal rule               | `---`                                                                                                             |
@@ -320,7 +312,7 @@ The outline of a document is shown below.
 ```
 Badge block
 # <Document Title>
-Subtitle, tagline, affiliation line, status blockquote
+Subtitle, tagline, affiliation line, metadata blockquote
 Metadata table
 ---
 ## Table of Contents
@@ -422,7 +414,7 @@ Appendix B is titled Related Documents and has seven subsections, in this order.
 
 | Subsection | Title                                         | Content                                                                                                |
 | ---------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| B.1        | Directly Referenced Documents                 | Table: Seq, Document ID, Document Name, Wave, Pri, Tag, Status.                                        |
+| B.1        | Directly Referenced Documents                 | Table: Seq, Document ID, Document Name, Wave, Pri, Tag.                                                |
 | B.2        | Documents That Reference This Document        | Table: Seq, Document ID, Document Name, Why It References.                                             |
 | B.3        | Documents This Document Depends On (Upstream) | Table: Seq, Document ID, Document Name, Dependency Type (Hard or Soft).                                |
 | B.4        | Documents This Document Unblocks (Downstream) | Table: Seq, Document ID, Document Name, Blocked Until.                                                 |
@@ -430,7 +422,7 @@ Appendix B is titled Related Documents and has seven subsections, in this order.
 | B.6        | External Reference Documents                  | Table: Reference Type, Where It Is Documented.                                                         |
 | B.7        | Document Conventions                          | A link to [Section 9](#9-vocabulary-standards) of this standard. The convention tables are not copied. |
 
-Every Document ID in B.1 to B.6 is a clickable link, except the ID of the document itself. The Tag column uses the values in [Section 9.3](#93-tag-values). The Status column uses the values in [Section 9.1](#91-status-values).
+Every Document ID in B.1 to B.6 is a clickable link, except the ID of the document itself. The Tag column uses the values in [Section 9.2](#92-tag-values).
 
 ---
 
@@ -450,16 +442,20 @@ The revision history is an unnumbered level-2 section titled Revision History. I
 
 ### 7.2 When to Add Rows
 
-Until the Phase 1 baseline, a document keeps a single row for version 1.0. An edit updates the Date field and the Change cell of that row, and adds no new row. Corrections before the first approval never add rows.
+A document that has never been committed keeps a single row at version 1.0. Each edit updates the Date field and the Change cell of that row. No new row is added.
 
-The Phase 1 baseline is the point at which the Lead Architect declares the Phase 1 documents frozen, planned for the end of Phase 1. From the baseline, every approved change adds a row with a new version.
+Once a document has been committed and pushed, each approved change adds a new row. The version increases by one minor digit. The previous rows are preserved. They are never removed or rewritten.
+
+The Phase 1 baseline is the point at which the Lead Architect declares the Phase 1 documents frozen, planned for the end of Phase 1. The rule above applies before and after the baseline. The baseline does not change how rows are added.
 
 ### 7.3 Version Numbering Rules
 
-- Versions have the form `MAJOR.MINOR`. The first version is 1.0.
-- A minor increase, for example 1.0 to 1.1, records an editorial or clarifying change.
-- A major increase, for example 1.1 to 2.0, records a change to a decision, the scope, or the structure.
-- The Version field, the status blockquote, the Version badge, and the latest revision row show the same version.
+- Versions have the form `MAJOR.MINOR`.
+- The major digit is the phase number. Phase 1 uses major digit 1. Phase 2 uses major digit 2. Phase 3 uses major digit 3.
+- The minor digit starts at 0 and increases by one for each approved change during the phase.
+- The first version of every Phase 1 document is 1.0.
+- No Phase 1 document uses major digit 2 or higher. A major bump happens only when a document is carried forward to a later phase, or when a new phase begins with its own documents.
+- The Version field, the metadata blockquote, and the latest revision row show the same version.
 - The PDF file name carries the version ([Section 11.2](#112-pdf-naming)).
 
 ---
@@ -482,11 +478,11 @@ The Decision column holds Pending or Approved. The Date column holds the date of
 
 ### 8.2 Sign-off Procedure
 
-1. The author completes the review checklist in [Section 12.2](#122-approval-workflow) and sets the Status field to In Review.
+1. The author completes the review checklist in [Section 12.1](#121-approval-workflow).
 2. The approver named in the Approved By field reads the document against the checklist.
 3. The approver records the decision and its date in the approval block.
-4. On approval, the author sets Status to Done and fills the Approved By and Approval Date fields.
-5. The author updates the Date field, the status blockquote, the Status badge, and the revision history, then commits the file.
+4. On approval, the author fills the Approved By and Approval Date fields.
+5. The author updates the Date field, the metadata blockquote, and the revision history, then commits the file.
 
 In Phase 1 the approver is the Lead Architect.
 
@@ -494,22 +490,9 @@ In Phase 1 the approver is the Lead Architect.
 
 ## 9. Vocabulary Standards
 
-These terms are fixed for all documents. This section records the status and tag vocabulary decision.
+These terms are fixed for all documents. This section records the priority and tag vocabulary decision. Document status is not part of a document. Live status is tracked in the Kanban board and the Blueprint dashboard.
 
-### 9.1 Status Values
-
-**Decision:** every document uses the four-value set below. Each value maps to the Kanban board columns, and any document is in exactly one state. Done is the only term for a finished and approved document. Completed and Approved are not used as status values.
-
-| Value       | Meaning                                      | Kanban Column  | Badge Colour |
-| ----------- | -------------------------------------------- | -------------- | ------------ |
-| Not Started | Work on the document has not begun.          | Backlog, Ready | 6e7781       |
-| In Progress | The document is being written.               | In Progress    | d29922       |
-| In Review   | The document is written and awaiting review. | In Review      | 1f6feb       |
-| Done        | The document is reviewed and approved.       | Done           | 2ea043       |
-
-**Exception:** in Appendix B of any document, the Status column may show Planned as shorthand for Not Started when it lists documents that are not yet written. Planned is not valid anywhere else.
-
-### 9.2 Priority Values
+### 9.1 Priority Values
 
 | Value | Name     | Meaning                            |
 | ----- | -------- | ---------------------------------- |
@@ -518,9 +501,9 @@ These terms are fixed for all documents. This section records the status and tag
 | P2    | Medium   | Supports Phase 1 delivery.         |
 | P3    | Low      | Can be deferred if time is short.  |
 
-### 9.3 Tag Values
+### 9.2 Tag Values
 
-Tag values describe the lifecycle bucket a document belongs to. Unlike Status, a Tag never changes. A document that started as UNBLOCK stays UNBLOCK even after it is Done.
+Tag values describe the lifecycle bucket a document belongs to. A Tag never changes.
 
 | Value   | Meaning                                                             |
 | ------- | ------------------------------------------------------------------- |
@@ -528,14 +511,13 @@ Tag values describe the lifecycle bucket a document belongs to. Unlike Status, a
 | FOLLOW  | Written during or after the work that it describes.                 |
 | HOLD    | Kept as a working file until its target document exists.            |
 
-### 9.4 Exact Term Usage
+### 9.3 Exact Term Usage
 
-- Every table, list, and field that gives a Status, Priority, or Tag uses the exact values in this section, with the same spelling and capitalisation.
-- These words are not used as a Status value: Completed, Complete, Approved, Draft, Finished, and WIP.
+- Every table, list, and field that gives a Priority or Tag uses the exact values in this section, with the same spelling and capitalisation.
 - These words are not used as a Tag value: DONE, UNBLOCKED, FOLLOWED.
 - Pending is valid only in the Approved By field, the Approval Date field, and the approval block.
-- The Approved By and Approval Date fields record approval. The Status field does not.
-- The Tag field is fixed at document creation and never changes. The Status field changes as the document progresses.
+- The Approved By and Approval Date fields record approval.
+- The Tag field is fixed at document creation and never changes.
 - Documents written before this standard are corrected to these terms.
 
 ---
@@ -634,7 +616,7 @@ docs/
 
 A file name or folder that does not follow this section is a defect. It is corrected before the file is committed.
 
-If the file is already committed, it is renamed with `git mv` so that its history is kept. Every link that points to the old name is then updated, and the check in [Section 12.2](#122-approval-workflow) is repeated.
+If the file is already committed, it is renamed with `git mv` so that its history is kept. Every link that points to the old name is then updated, and the check in [Section 12.1](#121-approval-workflow) is repeated.
 
 ```
 git mv <old file name> <new file name>
@@ -644,34 +626,22 @@ git mv <old file name> <new file name>
 
 ## 12. Document Lifecycle
 
-### 12.1 Status Transitions
+### 12.1 Approval Workflow
 
-| From        | To          | Condition                                                      |
-| ----------- | ----------- | -------------------------------------------------------------- |
-| Not Started | In Progress | Writing begins.                                                |
-| In Progress | In Review   | The review checklist is complete.                              |
-| In Review   | In Progress | The approver requests changes.                                 |
-| In Review   | Done        | The approver approves the document.                            |
-| Done        | In Progress | A revision starts ([Section 7](#7-revision-history-standard)). |
-
-No other transition is used. A document never moves from Not Started directly to Done.
-
-### 12.2 Approval Workflow
-
-The review checklist has six checks. All six must pass before a document moves to In Review.
+The review checklist has six checks. All six must pass before a document is approved.
 
 | Check      | Question                                                                                                                         |
 | ---------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| Header     | Do the badges, title, subtitle, tagline, affiliation line, and status blockquote match [Section 2](#2-document-header-standard)? |
-| Metadata   | Does the table have the 18 fields, in order, and do its values match the status blockquote?                                      |
+| Header     | Do the badges, title, subtitle, tagline, affiliation line, and metadata blockquote match [Section 2](#2-document-header-standard)? |
+| Metadata   | Does the table have the 17 fields, in order, and do its values match the metadata blockquote?                                    |
 | Structure  | Does the body follow [Section 5](#5-body-structure-standard)?                                                                    |
-| Vocabulary | Are all Status, Priority, and Tag values from [Section 9](#9-vocabulary-standards)?                                              |
+| Vocabulary | Are all Priority and Tag values from [Section 9](#9-vocabulary-standards)?                                                       |
 | Links      | Does every link resolve to an existing file or anchor?                                                                           |
 | Style      | Does the document follow [Section 10](#10-style-rules)?                                                                          |
 
 The sign-off steps are in [Section 8.2](#82-sign-off-procedure).
 
-### 12.3 Superseding Rules
+### 12.2 Superseding Rules
 
 The Supersedes field records what the document replaces. The first version of a document states None (first version). A later version of the same document states the previous version, for example Version 1.0 of this document.
 
@@ -689,15 +659,16 @@ A document that replaces a different document cites that document in the citatio
 
 ## Revision History
 
-| Version | Date       | Author      | Change           |
-| ------- | ---------- | ----------- | ---------------- |
-| 1.0     | 2026-10-11 | Koushal Jha | Initial release. |
+| Version | Date       | Author      | Change                                                                                                                             |
+| ------- | ---------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| 1.0     | 2026-10-11 | Koushal Jha | Initial release.                                                                                                                   |
+| 1.1     | 2026-10-11 | Koushal Jha | Removed Status from the standard: badges, metadata table, metadata blockquote, vocabulary, lifecycle, templates, and Appendix B.  |
 
 ---
 
 ## Appendix A: Metadata Table Template
 
-Copy the table below into a new document. Replace each placeholder in angle brackets. Do not change the fixed values.
+Copy the table below into a new document. It has 17 rows. Replace each placeholder in angle brackets. Do not change the fixed values.
 
 ```
 | Field              | Value                                                             |
@@ -714,10 +685,9 @@ Copy the table below into a new document. Replace each placeholder in angle brac
 | Version            | <MAJOR.MINOR>                                                     |
 | Date               | <YYYY-MM-DD>                                                      |
 | Author             | <Name>, <Role>                                                    |
-| Status             | <One of the four status values>                                   |
 | Approved By        | <Name>, <Role> or Pending                                         |
 | Approval Date      | <YYYY-MM-DD> or Pending                                           |
-| Supersedes         | None (first version)                                              |
+| Supersedes         | None (first version) or <Previous Version>                        |
 | Related Documents  | See Appendix B                                                    |
 | Affiliation        | Independent · Not affiliated with CRIS, IRCTC, or Indian Railways |
 ```
@@ -726,10 +696,10 @@ Copy the table below into a new document. Replace each placeholder in angle brac
 
 ### B.1 Directly Referenced Documents
 
-| Seq | Document ID                                                                                | Document Name                          | Wave | Pri | Tag     | Status |
-| --- | ------------------------------------------------------------------------------------------ | -------------------------------------- | ---- | --- | ------- | ------ |
-| 0.0 | [SRIS-P1-GOV-001](./SRIS-P1-GOV-001_DocumentationIndexAndNavigationMap.md)                 | Documentation Index and Navigation Map | 0    | P0  | UNBLOCK | Done   |
-| 2.1 | [SRIS-P1-ARCH-001](../wave-2-architecture/SRIS-P1-ARCH-001_MicroservicesIdentification.md) | Microservices Identification           | 2    | P0  | UNBLOCK | Done   |
+| Seq | Document ID                                                                                | Document Name                          | Wave | Pri | Tag     |
+| --- | ------------------------------------------------------------------------------------------ | -------------------------------------- | ---- | --- | ------- |
+| 0.0 | [SRIS-P1-GOV-001](./SRIS-P1-GOV-001_DocumentationIndexAndNavigationMap.md)                 | Documentation Index and Navigation Map | 0    | P0  | UNBLOCK |
+| 2.1 | [SRIS-P1-ARCH-001](../wave-2-architecture/SRIS-P1-ARCH-001_MicroservicesIdentification.md) | Microservices Identification           | 2    | P0  | UNBLOCK |
 
 ### B.2 Documents That Reference This Document
 
@@ -745,7 +715,7 @@ All other Phase 1 documents are written against this standard.
 
 ### B.5 Master Documentation Index
 
-For the complete list of Phase 1 documents with sequence, ID, wave, priority, tag, and status, see:
+For the complete list of Phase 1 documents with sequence, ID, wave, priority, and tag, see:
 
 [SRIS-P1-GOV-001](./SRIS-P1-GOV-001_DocumentationIndexAndNavigationMap.md) — Documentation Index and Navigation Map
 
@@ -755,7 +725,7 @@ None.
 
 ### B.7 Document Conventions
 
-The conventions for Status, Priority, and Tag values are defined in [Section 9](#9-vocabulary-standards) of this document.
+The conventions for Priority and Tag values are defined in [Section 9](#9-vocabulary-standards) of this document.
 
 ---
 

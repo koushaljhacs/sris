@@ -1,12 +1,20 @@
+<div align="center">
+
+![Wave](https://img.shields.io/badge/Wave-2-0550AE?style=for-the-badge)
+![Phase](https://img.shields.io/badge/Phase-1%20Foundation-6f42c1?style=for-the-badge)
+![Category](https://img.shields.io/badge/Category-ARCH-6e7781?style=for-the-badge)
+
+</div>
+
 # Microservices Identification: Phase 1 Foundation
 
-**SRIS — Sarathi Railway Information System**
+*SRIS — Sarathi Railway Information System*
 
 *A Unified Railway Management Platform*
 
 *Inspired by CRIS and IRCTC · Independent project*
 
-> **Status:** Approved | **Version:** 1.0 | **Date:** 2026-10-09 | **Document ID:** SRIS-P1-ARCH-001
+> **Version:** 1.1 | **Date:** 2026-10-11 | **Document ID:** SRIS-P1-ARCH-001
 
 | Field              | Value                                                             |
 | ------------------ | ----------------------------------------------------------------- |
@@ -19,13 +27,12 @@
 | Document Type      | Architecture Decision Document                                    |
 | Milestone          | Phase 1 Foundation                                                |
 | Classification     | Internal                                                          |
-| Version            | 1.0                                                               |
-| Date               | 2026-10-09                                                        |
+| Version            | 1.1                                                               |
+| Date               | 2026-10-11                                                        |
 | Author             | Koushal Jha, Lead Architect                                       |
-| Status             | Approved                                                          |
 | Approved By        | Koushal Jha, Lead Architect                                       |
-| Approval Date      | 2026-10-10                                                        |
-| Supersedes         | None (first version)                                              |
+| Approval Date      | 2026-10-11                                                        |
+| Supersedes         | Version 1.0 of this document                                      |
 | Related Documents  | See Appendix B                                                    |
 | Affiliation        | Independent · Not affiliated with CRIS, IRCTC, or Indian Railways |
 
@@ -36,9 +43,8 @@
 1. [Introduction](#1-introduction)
    - [1.1 Purpose](#11-purpose)
    - [1.2 Scope](#12-scope)
-   - [1.3 Out of Scope](#13-out-of-scope)
-   - [1.4 Intended Audience](#14-intended-audience)
-   - [1.5 Definitions and Abbreviations](#15-definitions-and-abbreviations)
+   - [1.3 Audience](#13-audience)
+   - [1.4 Definitions and Abbreviations](#14-definitions-and-abbreviations)
 2. [Inputs and Constraints](#2-inputs-and-constraints)
 3. [Methodology](#3-methodology)
    - [3.1 Identification Process](#31-identification-process)
@@ -66,13 +72,13 @@
    - [8.1 Assumptions](#81-assumptions)
    - [8.2 Risks](#82-risks)
    - [8.3 Open Items](#83-open-items)
-9. [Acceptance Criteria and Sign-off](#9-acceptance-criteria-and-sign-off)
+9. [Acceptance Criteria](#9-acceptance-criteria)
    - [9.1 Acceptance Checklist](#91-acceptance-checklist)
-   - [9.2 Approval](#92-approval)
+10. [Approval](#10-approval)
 
-- [Appendix A: Evolution of the Service List](#appendix-a-evolution-of-the-service-list)
-- [Appendix B: Related Documents and Cross-Reference Index](#appendix-b-related-documents-and-cross-reference-index)
 - [Revision History](#revision-history)
+- [Appendix A: Evolution of the Service List](#appendix-a-evolution-of-the-service-list)
+- [Appendix B: Related Documents](#appendix-b-related-documents)
 
 ---
 
@@ -99,9 +105,7 @@ In scope:
 - Identification of bounded contexts and the deployable services for Phase 1.
 - Justification of service boundaries and of the final count of six.
 
-The Phase 1 goal that drives the scope is a **complete end-to-end booking flow**: an employee sets up train data, a customer searches, holds a seat, pays, and receives a PNR.
-
-### 1.3 Out of Scope
+Out of scope:
 
 | Topic                                                                                   | Where it is documented                                            |
 | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
@@ -115,18 +119,17 @@ The Phase 1 goal that drives the scope is a **complete end-to-end booking flow**
 | Project vision, goals, motivation, and overview                                         | Project vision and scope documentation (to be created)            |
 | Development approach, team setup, roles, and responsibilities                           | Project management documentation (to be created)                  |
 
-### 1.4 Intended Audience
+The Phase 1 goal that drives the scope is a **complete end-to-end booking flow**: an employee sets up train data, a customer searches, holds a seat, pays, and receives a PNR.
 
-  - **Project evaluators** — verify the completeness and quality of
-    the microservices identification.
-  - **Supervisor** — reviews the document as part of the academic
-    project.
-  - **Team members** — understand the service boundaries they will
-    implement, test, or design against.
-  - **Lead Architect** — maintains this document.
-  - **Future contributors** — onboard into the architecture.
+### 1.3 Audience
 
-### 1.5 Definitions and Abbreviations
+- **Project evaluators** — verify the completeness and quality of the microservices identification.
+- **Supervisor** — reviews the document as part of the academic project.
+- **Team members** — understand the service boundaries they will implement, test, or design against.
+- **Lead Architect** — maintains this document.
+- **Future contributors** — onboard into the architecture.
+
+### 1.4 Definitions and Abbreviations
 
 | Term              | Meaning                                                                                                  |
 | ----------------- | -------------------------------------------------------------------------------------------------------- |
@@ -235,7 +238,7 @@ The project designs the ideal bounded contexts first, then consolidates them int
 1. **Domain cohesion (D1, D2).** Some contexts share invariants and would form cyclic dependencies if split. Keeping them together avoids distributed transactions and a distributed monolith.
 2. **Delivery capacity (D5).** Each additional deployable adds build, security, contract, and test overhead for a small team.
 
-Load and memory validation is performed in separate documents and does not decide the service count (section 1.3).
+Load and memory validation is performed in separate documents and does not decide the service count (section 1.2).
 
 ### 5.3 Alternatives Considered
 
@@ -479,34 +482,43 @@ Following these rules means a module can become its own service in a later phase
 
 ### 8.3 Open Items
 
-| ID   | Item                                                                                  | Owner          | Status                            |
+| ID   | Item                                                                                  | Owner          | Outcome                           |
 | ---- | ------------------------------------------------------------------------------------- | -------------- | --------------------------------- |
 | OI-1 | Finalize the capability list, numbering, and order in the requirement gathering tasks | Lead Architect | Deferred to requirement gathering |
 | OI-2 | Confirm the Master Data to Reservation mechanism (synchronous or event)               | Lead Architect | Deferred to integration design    |
 
 ---
 
-## 9. Acceptance Criteria and Sign-off
+## 9. Acceptance Criteria
 
 ### 9.1 Acceptance Checklist
 
 Mapped to the task definition.
 
-| Task requirement                                          | Evidence                                | Status |
+| Task requirement                                          | Evidence                                | Result |
 | --------------------------------------------------------- | --------------------------------------- | ------ |
 | Complete list of railway domain capabilities              | Section 4 (Phase 1 list is provisional) | Done   |
 | Grouped list of microservices with clear responsibilities | Section 6                               | Done   |
 | Justification for the grouping and the final count        | Sections 5 and 7                        | Done   |
-| List finalized and approved by the developer              | Section 9.2                             | Done   |
+| List finalized and approved by the developer              | Section 10                              | Done   |
 | Output ready to convert into a formal document            | This document                           | Done   |
 
-### 9.2 Approval
+---
 
-The Lead Architect approved this document on 2026-10-09, and the task is closed. OI-1 and OI-2 are deferred by design and did not block approval.
+## 10. Approval
 
 | Role           | Name        | Decision | Date       |
 | -------------- | ----------- | -------- | ---------- |
-| Lead Architect | Koushal Jha | Approved | 2026-10-10 |
+| Lead Architect | Koushal Jha | Approved | 2026-10-11 |
+
+---
+
+## Revision History
+
+| Version | Date       | Author      | Change                                                                          |
+| ------- | ---------- | ----------- | ------------------------------------------------------------------------------- |
+| 1.0     | 2026-10-09 | Koushal Jha | Initial release. Approved for Phase 1 execution.                                |
+| 1.1     | 2026-10-11 | Koushal Jha | Aligned with GOV-002 template standard: removed Status everywhere, restructured metadata and appendices. |
 
 ---
 
@@ -519,98 +531,85 @@ The Lead Architect approved this document on 2026-10-09, and the task is closed.
 | Coarse-grained                     | 4: Core Commerce, Operations, Realtime, Admin                                                                                            | Alternative proposal | Rejected as too coarse                                                                                                                                                  |
 | **Final**                          | **6: IAM, Master Data and Pricing, Reservation, Search BFF, Mock Payment Gateway, Notification**                                         | Lead Architect       | **Selected for Phase 1**                                                                                                                                                |
 
-## Appendix B: Related Documents and Cross-Reference Index
+## Appendix B: Related Documents
 
-This appendix lists every document referenced by this document, along with its identity and status in the Phase 1 register. Use this table to locate any related document by its sequence number, ID, or name.
+This appendix lists every document referenced by this document, along with its identity in the Phase 1 register. Use this table to locate any related document by its sequence number, ID, or name.
 
-### B.1 — Directly Referenced Documents
+### B.1 Directly Referenced Documents
 
-| Seq  | Document ID      | Document Name                                | Wave | Pri | Tag     | Status  |
-| ---- | ---------------- | -------------------------------------------- | ---- | --- | ------- | ------- |
-| 2.1  | SRIS-P1-ARCH-001 | Microservices Identification                 | 2    | P0  | DONE    | Done    |
-| 2.2  | SRIS-P1-ARCH-002 | Architecture Principles                      | 2    | P0  | UNBLOCK | Planned |
-| 2.3  | SRIS-P1-ARCH-003 | System Architecture Document                 | 2    | P0  | UNBLOCK | Planned |
-| 2.8  | SRIS-P1-ARCH-008 | Technology Stack ADR                         | 2    | P0  | UNBLOCK | Planned |
-| 2.9  | SRIS-P1-ARCH-009 | Service Interaction and Communication Design | 2    | P0  | UNBLOCK | Planned |
-| 2.14 | SRIS-P1-ARCH-014 | Distributed Concurrency and Locking Strategy | 2    | P0  | UNBLOCK | Planned |
-| 3.14 | SRIS-P1-API-001  | API Contract Document (OpenAPI)              | 3    | P0  | UNBLOCK | Planned |
-| 3.16 | SRIS-P1-API-003  | Event Schema Document (AsyncAPI)             | 3    | P0  | UNBLOCK | Planned |
-| 3.1  | SRIS-P1-DATA-001 | Data Design Document                         | 3    | P0  | UNBLOCK | Planned |
-| 5.1  | SRIS-P1-INF-001  | Infrastructure and Technology Document       | 5    | P0  | UNBLOCK | Planned |
-| 1.5  | SRIS-P1-REQ-005  | Non-Functional Requirements (ISO 25010)      | 1    | P0  | UNBLOCK | Planned |
-| 0.4  | SRIS-P1-GOV-005  | Project Vision and Scope Document            | 0    | P0  | UNBLOCK | Planned |
-| 0.6  | SRIS-P1-GOV-007  | Project Management Plan                      | 0    | P0  | UNBLOCK | Planned |
+| Seq  | Document ID                                                                                           | Document Name                                | Wave | Pri | Tag     |
+| ---- | ----------------------------------------------------------------------------------------------------- | -------------------------------------------- | ---- | --- | ------- |
+| 2.1  | SRIS-P1-ARCH-001                                                                                      | Microservices Identification                 | 2    | P0  | UNBLOCK |
+| 2.2  | [SRIS-P1-ARCH-002](./SRIS-P1-ARCH-002_ArchitecturePrinciples.md)                                      | Architecture Principles                      | 2    | P0  | UNBLOCK |
+| 2.3  | [SRIS-P1-ARCH-003](./SRIS-P1-ARCH-003_SystemArchitectureDocument.md)                                  | System Architecture Document                 | 2    | P0  | UNBLOCK |
+| 2.8  | [SRIS-P1-ARCH-008](./SRIS-P1-ARCH-008_TechnologyStackADR.md)                                          | Technology Stack ADR                         | 2    | P0  | UNBLOCK |
+| 2.9  | [SRIS-P1-ARCH-009](./SRIS-P1-ARCH-009_ServiceInteractionAndCommunicationDesign.md)                    | Service Interaction and Communication Design | 2    | P0  | UNBLOCK |
+| 2.14 | [SRIS-P1-ARCH-014](./SRIS-P1-ARCH-014_DistributedConcurrencyAndLockingStrategy.md)                    | Distributed Concurrency and Locking Strategy | 2    | P0  | UNBLOCK |
+| 3.14 | [SRIS-P1-API-001](../wave-3-detailed-design/SRIS-P1-API-001_APIContractDocumentOpenAPI.md)            | API Contract Document (OpenAPI)              | 3    | P0  | UNBLOCK |
+| 3.16 | [SRIS-P1-API-003](../wave-3-detailed-design/SRIS-P1-API-003_EventSchemaDocumentAsyncAPI.md)           | Event Schema Document (AsyncAPI)             | 3    | P0  | UNBLOCK |
+| 3.1  | [SRIS-P1-DATA-001](../wave-3-detailed-design/SRIS-P1-DATA-001_DataDesignDocument.md)                  | Data Design Document                         | 3    | P0  | UNBLOCK |
+| 5.1  | [SRIS-P1-INF-001](../wave-5-devops-operations/SRIS-P1-INF-001_InfrastructureAndTechnologyDocument.md) | Infrastructure and Technology Document       | 5    | P0  | UNBLOCK |
+| 1.5  | [SRIS-P1-REQ-005](../wave-1-requirements/SRIS-P1-REQ-005_NonFunctionalRequirementsISO25010.md)        | Non-Functional Requirements (ISO 25010)      | 1    | P0  | UNBLOCK |
+| 0.4  | [SRIS-P1-GOV-005](../wave-0-project-foundation/SRIS-P1-GOV-005_ProjectVisionAndScopeDocument.md)      | Project Vision and Scope Document            | 0    | P0  | UNBLOCK |
+| 0.6  | [SRIS-P1-GOV-007](../wave-0-project-foundation/SRIS-P1-GOV-007_ProjectManagementPlan.md)              | Project Management Plan                      | 0    | P0  | UNBLOCK |
 
-### B.2 — Documents That Reference This Document
+### B.2 Documents That Reference This Document
 
-| Seq  | Document ID      | Document Name                | Why It References             |
-| ---- | ---------------- | ---------------------------- | ----------------------------- |
-| 2.3  | SRIS-P1-ARCH-003 | System Architecture Document | Extends this service catalog  |
-| 2.4  | SRIS-P1-ARCH-004 | Bounded Context Map          | Visualizes this context split |
-| 2.9  | SRIS-P1-ARCH-009 | Service Interaction Design   | Details these interactions    |
-| 3.1  | SRIS-P1-DATA-001 | Data Design Document         | Schema per service            |
-| 3.14 | SRIS-P1-API-001  | API Contract Document        | Endpoints per service         |
+| Seq  | Document ID                                                                                | Document Name                | Why It References             |
+| ---- | ------------------------------------------------------------------------------------------ | ---------------------------- | ----------------------------- |
+| 2.3  | [SRIS-P1-ARCH-003](./SRIS-P1-ARCH-003_SystemArchitectureDocument.md)                       | System Architecture Document | Extends this service catalog  |
+| 2.4  | [SRIS-P1-ARCH-004](./SRIS-P1-ARCH-004_BoundedContextMap.md)                                | Bounded Context Map          | Visualizes this context split |
+| 2.9  | [SRIS-P1-ARCH-009](./SRIS-P1-ARCH-009_ServiceInteractionAndCommunicationDesign.md)         | Service Interaction Design   | Details these interactions    |
+| 3.1  | [SRIS-P1-DATA-001](../wave-3-detailed-design/SRIS-P1-DATA-001_DataDesignDocument.md)       | Data Design Document         | Schema per service            |
+| 3.14 | [SRIS-P1-API-001](../wave-3-detailed-design/SRIS-P1-API-001_APIContractDocumentOpenAPI.md) | API Contract Document        | Endpoints per service         |
 
-### B.3 — Documents This Document Depends On (Upstream)
+### B.3 Documents This Document Depends On (Upstream)
 
-| Seq | Document ID     | Document Name                     | Dependency Type |
-| --- | --------------- | --------------------------------- | --------------- |
-| 1.3 | SRIS-P1-REQ-003 | Capability Catalog (Final)        | Hard            |
-| 1.2 | SRIS-P1-REQ-002 | Business Requirements Document    | Hard            |
-| 0.4 | SRIS-P1-GOV-005 | Project Vision and Scope Document | Soft            |
-| 0.3 | SRIS-P1-GOV-004 | Document Cross-Reference Standard | Hard            |
+| Seq | Document ID                                                                                       | Document Name                     | Dependency Type |
+| --- | ------------------------------------------------------------------------------------------------- | --------------------------------- | --------------- |
+| 1.3 | [SRIS-P1-REQ-003](../wave-1-requirements/SRIS-P1-REQ-003_CapabilityCatalogFinal.md)               | Capability Catalog (Final)        | Hard            |
+| 1.2 | [SRIS-P1-REQ-002](../wave-1-requirements/SRIS-P1-REQ-002_BusinessRequirementsDocumentBRD.md)      | Business Requirements Document    | Hard            |
+| 0.4 | [SRIS-P1-GOV-005](../wave-0-project-foundation/SRIS-P1-GOV-005_ProjectVisionAndScopeDocument.md)  | Project Vision and Scope Document | Soft            |
+| 0.3 | [SRIS-P1-GOV-004](../wave-0-project-foundation/SRIS-P1-GOV-004_DocumentCrossReferenceStandard.md) | Document Cross-Reference Standard | Hard            |
 
-### B.4 — Documents This Document Unblocks (Downstream)
+### B.4 Documents This Document Unblocks (Downstream)
 
-| Seq  | Document ID      | Document Name                                | Blocked Until |
-| ---- | ---------------- | -------------------------------------------- | ------------- |
-| 2.3  | SRIS-P1-ARCH-003 | System Architecture Document                 | This approved |
-| 2.4  | SRIS-P1-ARCH-004 | Bounded Context Map                          | This approved |
-| 2.5  | SRIS-P1-ARCH-005 | Domain Model Document                        | This approved |
-| 2.9  | SRIS-P1-ARCH-009 | Service Interaction and Communication Design | This approved |
-| 3.14 | SRIS-P1-API-001  | API Contract Document (OpenAPI)              | This approved |
-| 3.16 | SRIS-P1-API-003  | Event Schema Document (AsyncAPI)             | This approved |
-| 3.1  | SRIS-P1-DATA-001 | Data Design Document                         | This approved |
+| Seq  | Document ID                                                                                 | Document Name                                | Blocked Until |
+| ---- | ------------------------------------------------------------------------------------------- | -------------------------------------------- | ------------- |
+| 2.3  | [SRIS-P1-ARCH-003](./SRIS-P1-ARCH-003_SystemArchitectureDocument.md)                        | System Architecture Document                 | This approved |
+| 2.4  | [SRIS-P1-ARCH-004](./SRIS-P1-ARCH-004_BoundedContextMap.md)                                 | Bounded Context Map                          | This approved |
+| 2.5  | [SRIS-P1-ARCH-005](./SRIS-P1-ARCH-005_DomainModelDocument.md)                               | Domain Model Document                        | This approved |
+| 2.9  | [SRIS-P1-ARCH-009](./SRIS-P1-ARCH-009_ServiceInteractionAndCommunicationDesign.md)          | Service Interaction and Communication Design | This approved |
+| 3.14 | [SRIS-P1-API-001](../wave-3-detailed-design/SRIS-P1-API-001_APIContractDocumentOpenAPI.md)  | API Contract Document (OpenAPI)              | This approved |
+| 3.16 | [SRIS-P1-API-003](../wave-3-detailed-design/SRIS-P1-API-003_EventSchemaDocumentAsyncAPI.md) | Event Schema Document (AsyncAPI)             | This approved |
+| 3.1  | [SRIS-P1-DATA-001](../wave-3-detailed-design/SRIS-P1-DATA-001_DataDesignDocument.md)        | Data Design Document                         | This approved |
 
-### B.5 — Master Documentation Index
+### B.5 Master Documentation Index
 
-For the complete list of all Phase 1 documents with sequence, ID, wave, priority, tag, status, and category, see:
+For the complete list of all Phase 1 documents with sequence, ID, wave, priority, and tag, see:
 
-SRIS-P1-GOV-001 — Documentation Index and Navigation Map
+[SRIS-P1-GOV-001](../wave-0-project-foundation/SRIS-P1-GOV-001_DocumentationIndexAndNavigationMap.md) — Documentation Index and Navigation Map
 
 The Documentation Index provides:
 
 - Full searchable list of all Phase 1 documents
-- Filtering by wave, priority, tag, status
+- Filtering by wave, priority, tag
 - Reading paths by role
 - Dependency graph visualization
 
-### B.6 — External Reference Documents
+### B.6 External Reference Documents
 
-| Reference Type         | Where It Is Documented                  |
-| ---------------------- | --------------------------------------- |
-| Detailed domain rules  | SRIS-P1-REQ-007 to SRIS-P1-REQ-011      |
-| Technology choices     | SRIS-P1-ARCH-008 (Technology Stack ADR) |
-| API contracts          | SRIS-P1-API-001 to SRIS-P1-API-013      |
-| Event schemas          | SRIS-P1-API-003 (AsyncAPI)              |
-| Database schemas       | SRIS-P1-DATA-003 (Physical Schema)      |
-| Load and resource data | SRIS-P1-NFR-HOLD-001 (Holding file)     |
-| Concurrency strategy   | SRIS-P1-ARCH-014                        |
-| Saga pattern design    | SRIS-P1-ARCH-015                        |
+| Reference Type         | Where It Is Documented                                                                                                                                                                          |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Detailed domain rules  | [SRIS-P1-REQ-007](../wave-1-requirements/SRIS-P1-REQ-007_DomainRulesFareCalculation.md) to [SRIS-P1-REQ-011](../wave-1-requirements/SRIS-P1-REQ-011_DomainRulesSeatMatrixAndInventory.md)       |
+| Technology choices     | [SRIS-P1-ARCH-008](./SRIS-P1-ARCH-008_TechnologyStackADR.md) (Technology Stack ADR)                                                                                                             |
+| API contracts          | [SRIS-P1-API-001](../wave-3-detailed-design/SRIS-P1-API-001_APIContractDocumentOpenAPI.md) to [SRIS-P1-API-013](../wave-3-detailed-design/SRIS-P1-API-013_APIVersioningAndDeprecationPolicy.md) |
+| Event schemas          | [SRIS-P1-API-003](../wave-3-detailed-design/SRIS-P1-API-003_EventSchemaDocumentAsyncAPI.md) (AsyncAPI)                                                                                          |
+| Database schemas       | [SRIS-P1-DATA-003](../wave-3-detailed-design/SRIS-P1-DATA-003_PhysicalDatabaseSchemaDocument.md) (Physical Schema)                                                                              |
+| Load and resource data | [SRIS-P1-NFR-HOLD-001](../wave-9-supporting-artifacts/SRIS-P1-NFR-HOLD-001_LoadModelAndResourceFitCheckHolding.md) (Holding file)                                                               |
+| Concurrency strategy   | [SRIS-P1-ARCH-014](./SRIS-P1-ARCH-014_DistributedConcurrencyAndLockingStrategy.md)                                                                                                              |
+| Saga pattern design    | [SRIS-P1-ARCH-015](./SRIS-P1-ARCH-015_DistributedTransactionAndSagaPatternDesign.md)                                                                                                            |
 
-### B.7 — Document Conventions
+### B.7 Document Conventions
 
-| Convention | Meaning                                                       |
-| ---------- | ------------------------------------------------------------- |
-| Seq        | Wave-based sequence number in the Phase 1 register            |
-| Doc ID     | Stable document identifier (`SRIS-P1-<CATEGORY>-<NNN>`)       |
-| Wave       | Lifecycle wave 0 to 9                                         |
-| Pri        | Priority: P0 critical, P1 high, P2 medium, P3 low             |
-| Tag        | UNBLOCK before coding, FOLLOW during/after coding, DONE, HOLD |
-| Status     | Not Started / In Progress / In Review / Completed             |
-
-## Revision History
-
-| Version | Date       | Author      | Change                     |
-| ------- | ---------- | ----------- | -------------------------- |
-| 1.0     | 2026-10-09 | Koushal Jha | Initial release (approved) |
+The conventions for Priority and Tag values are defined in [Section 9](../wave-0-project-foundation/SRIS-P1-GOV-002_DocumentTemplateStandard.md#9-vocabulary-standards) of [SRIS-P1-GOV-002](../wave-0-project-foundation/SRIS-P1-GOV-002_DocumentTemplateStandard.md) — Document Template Standard.
