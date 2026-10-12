@@ -14,7 +14,7 @@
 
 *Inspired by CRIS and IRCTC · Independent project*
 
-> **Version:** 1.2 | **Date:** 2026-10-12 | **Document ID:** SRIS-P1-GOV-002
+> **Version:** 1.3 | **Date:** 2026-10-12 | **Document ID:** SRIS-P1-GOV-002
 
 | Field              | Value                                                             |
 | ------------------ | ----------------------------------------------------------------- |
@@ -27,12 +27,12 @@
 | Document Type      | Standard Document                                                 |
 | Milestone          | Phase 1 Foundation                                                |
 | Classification     | Internal                                                          |
-| Version            | 1.2                                                               |
+| Version            | 1.3                                                               |
 | Date               | 2026-10-12                                                        |
 | Author             | Koushal Jha, Lead Architect                                       |
 | Approved By        | Koushal Jha, Lead Architect                                       |
 | Approval Date      | 2026-10-12                                                        |
-| Supersedes         | Version 1.1 of this document                                      |
+| Supersedes         | Version 1.2 of this document                                      |
 | Related Documents  | See Appendix B                                                    |
 | Affiliation        | Independent · Not affiliated with CRIS, IRCTC, or Indian Railways |
 
@@ -419,7 +419,7 @@ Appendix B is titled Related Documents and has seven subsections, in this order.
 | B.3        | Documents This Document Depends On (Upstream) | Table: Seq, Document ID, Document Name, Dependency Type (Hard or Soft).                                |
 | B.4        | Documents This Document Unblocks (Downstream) | Table: Seq, Document ID, Document Name, Blocked Until.                                                 |
 | B.5        | Master Documentation Index                    | A link to the documentation index.                                                                     |
-| B.6        | External Reference Documents                  | Table: Reference Type, Where It Is Documented.                                                         |
+| B.6        | External Reference Documents                  | Table: Reference Type, Where It Is Documented. A source outside the Phase 1 register, such as a published standard, a law, or a third-party specification. Phase 1 documents belong in B.1. |                                                         |
 | B.7        | Document Conventions                          | A link to [Section 9](#9-vocabulary-standards) of this standard. The convention tables are not copied. |
 
 Every Document ID in B.1 to B.6 is a clickable link, except the ID of the document itself. The Tag column uses the values in [Section 9.2](#92-tag-values).
@@ -664,6 +664,7 @@ A document that replaces a different document cites that document in the citatio
 | 1.0     | 2026-10-11 | Koushal Jha | Initial release.                                                                                                                                                                  |
 | 1.1     | 2026-10-11 | Koushal Jha | Removed Status from the standard: badges, metadata table, metadata blockquote, vocabulary, lifecycle, templates, and Appendix B.                                                  |
 | 1.2     | 2026-10-12 | Koushal Jha | Removed the rule that forbids linking to files that do not exist yet. Every Document ID is now a hyperlink, whether the target file is committed or planned. |
+| 1.3     | 2026-10-12 | Koushal Jha | Clarified that B.6 External Reference Documents holds sources outside the Phase 1 register. Phase 1 documents belong in B.1. |
 
 ---
 
