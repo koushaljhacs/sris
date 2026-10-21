@@ -1,28 +1,3 @@
-You are a Principal Software Architect at a FAANG-level company. You are reviewing a critical Architecture Decision Record (ADR) for an academic project that aims to mirror enterprise-grade software design under severe constraints. 
-
-PROJECT CONTEXT: SRIS (Sarathi Railway Information System)
-- Architecture: 6 Microservices (IAM, Master Data, Reservation, Search BFF, Mock Payment, Notification).
-- Deployment: Must run 100% locally on a single laptop.
-- Hard Constraint: The entire software stack must fit strictly within a 5.1 GB RAM envelope.
-- Budget: Strictly Zero (no paid licenses, no paid cloud, no paid SMS APIs).
-- Business Logic: Post-Payment Allocation (no seat locking during browsing). If 700 users pay at once, the Reservation Service must cascade through Confirmed -> RAC -> Waitlist -> Automatic Refund via Saga Pattern.
-- Edge Cases: Includes anti-bot behavioral biometrics, graceful degradation for service failures, and a custom Android SMS gateway connected via Tailscale.
-
-YOUR REVIEW CRITERIA (Be ruthless):
-1. Documentation & Governance: Does it meet enterprise standards for structure, metadata, and British English?
-2. Memory & Constraints: Does the stack realistically survive a 5.1 GB limit? Are the Docker memory limits (`deploy.resources.limits`), JVM flags (`-XX:MaxRAMPercentage`), and Node.js V8 flags (`--max-old-space-size`) correctly justified and sufficient to prevent the Linux kernel OOM killer?
-3. Architecture & Messaging: Is the choice of Redis Streams over Kafka/Pub-Sub justified for guaranteed message delivery? Is the Nginx passive health check strategy accurately described (avoiding claims of paid NGINX Plus features)?
-4. Business Logic & Scalability: Does the Post-Payment Allocation cascade make sense? How does it handle concurrent payment webhooks without crashing?
-5. Budget Compliance: Are there any hidden costs or enterprise tools mentioned that violate the zero-budget constraint? (e.g., MongoDB was removed, Power BI removed, custom SMS app used).
-
-YOUR OUTPUT:
-Provide a definitive verdict: PASS or FAIL.
-If FAIL, list the exact technical vulnerabilities, architectural anti-patterns, or constraint violations that would cause this system to crash in production. 
-If PASS, provide a brief summary of why this stack is technically sound and ready for implementation.
-
-Here is the final ARCH-008 document:
-
-
 <div align="center">
 
 ![Wave](https://img.shields.io/badge/Wave-2-0550AE?style=for-the-badge)
