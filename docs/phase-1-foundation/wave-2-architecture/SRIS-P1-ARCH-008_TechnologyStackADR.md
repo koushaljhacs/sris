@@ -14,7 +14,7 @@
 
 *Inspired by CRIS and IRCTC · Independent project*
 
-> **Version:** 1.0 | **Date:** 2026-10-17 | **Document ID:** SRIS-P1-ARCH-008
+> **Version:** 1.1 | **Date:** 2026-10-22 | **Document ID:** SRIS-P1-ARCH-008
 
 | Field              | Value                                                             |
 | ------------------ | ----------------------------------------------------------------- |
@@ -27,12 +27,12 @@
 | Document Type      | Architecture Decision Document                                    |
 | Milestone          | Phase 1 Foundation                                                |
 | Classification     | Internal                                                          |
-| Version            | 1.0                                                               |
-| Date               | 2026-10-17                                                        |
+| Version            | 1.1                                                               |
+| Date               | 2026-10-22                                                        |
 | Author             | Koushal Jha, Lead Architect                                       |
 | Approved By        | Koushal Jha, Lead Architect                                       |
-| Approval Date      | 2026-10-17                                                        |
-| Supersedes         | None (first version)                                              |
+| Approval Date      | 2026-10-22                                                        |
+| Supersedes         | Version 1.0 of this document                                      |
 | Related Documents  | See Appendix B                                                    |
 | Affiliation        | Independent · Not affiliated with CRIS, IRCTC, or Indian Railways |
 
@@ -198,8 +198,8 @@ Node.js is selected for these services because they are highly I/O-bound. The Se
 **Python (Embedded Automation Daemon):**
 Python runs inside the S6 container to monitor CPU/RAM usage and detect anomaly patterns (bot attacks). It uses `psutil` to ensure the server does not exceed the 5.1 GB ceiling, and `scikit-learn` to detect rapid-fire API requests from botnets. Heavy AI/ML libraries like TensorFlow are strictly deferred to Phase 2.
 
-**PostgreSQL (S1, S2, S3, S5, S6):**
-PostgreSQL is selected for all data. Each service operates its own logical schema to enforce the "Own Your Data" principle. To protect the 5.1 GB envelope, MongoDB was eliminated; the Notification Service (S6) stores logs in a PostgreSQL `JSONB` column. **To prevent PostgreSQL's multi-process architecture from exhausting the host RAM, strict connection pooling is mandated: HikariCP for Java services (capped at 5 connections) and Prisma client limits for Node.js (capped at 3 connections).**
+**PostgreSQL (S1, S2, S3, S6):**
+PostgreSQL is selected for all persisting data. Each persisting service operates its own logical database to enforce the "Own Your Data" principle. S5 Payment Gateway holds no persistent state and has no database role; it is an external system boundary that processes payment requests and returns results, and its attempted-state tracking lives inside S3's `sris_reservation` database as the `payment_inflight` record. To protect the 5.1 GB envelope, MongoDB was eliminated; the Notification Service (S6) stores logs in a PostgreSQL `JSONB` column. **To prevent PostgreSQL's multi-process architecture from exhausting the host RAM, strict connection pooling is mandated: HikariCP for Java services (capped at 5 connections) and Prisma client limits for Node.js (capped at 3 connections).**
 
 **Redis Streams & Transactional Outbox (Cache & Messaging):**
 Redis is selected for two critical functions: caching seat availability and acting as the persistent message broker for the 8 integration events. It replaces Apache Kafka (too heavy) and Redis Pub/Sub (which drops messages). 
@@ -243,7 +243,7 @@ flowchart TD
     Nginx --> |"/master-data/*"| S2["S2 Master Data<br/>(Java)"]:::backend
     Nginx --> |"/booking/*"| S3["S3 Reservation<br/>(Java)"]:::backend
     Nginx --> |"/search/*"| S4["S4 Search BFF<br/>(Node.js)"]:::backend
-    Nginx --> |"/payment/*"| S5["S5 Mock Payment<br/>(Node.js)"]:::backend
+    Nginx --> |"/payment/*"| S5["S5 Payment Gateway<br/>(Node.js)"]:::backend
 
     %% Synchronous Service-to-Service Communication
     S4 --> |"Fetch Schedules/Fares"| S2
@@ -276,7 +276,7 @@ flowchart TD
 
     %% Infrastructure Security
     Tailscale["Tailscale VPN<br/>(Zero-Trust)"]:::infra -.-> |"Secure Admin Access"| DB_RES
-    Tailscale -.-> |"Secure Admin Access"| Redis   
+    Tailscale -.-> |"Secure Admin Access"| Redis
    ```
 
    ---
@@ -296,7 +296,7 @@ flowchart TD
 
 | Role           | Name        | Decision | Date       |
 | -------------- | ----------- | -------- | ---------- |
-| Lead Architect | Koushal Jha | Approved | 2026-10-17 |
+| Lead Architect | Koushal Jha | Approved | 2026-10-22 |
 
 ---
 
@@ -305,6 +305,7 @@ flowchart TD
 | Version | Date       | Author      | Change           |
 | ------- | ---------- | ----------- | ---------------- |
 | 1.0     | 2026-10-17 | Koushal Jha | Initial release. |
+| 1.1     | 2026-10-22 | Koushal Jha | Removed S5 from the PostgreSQL dependent list in §4.2. S5 Payment Gateway holds no persistent state and has no database role; its attempted-state tracking lives inside `sris_reservation` under S3. Replaced "logical schema" with "logical database" in §4.2 to match ARCH-003 §2.3's four-database model. Renamed S5 to "S5 Payment Gateway" in §4.3 System Topology Mermaid. |
 
 ---
 
