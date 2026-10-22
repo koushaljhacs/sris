@@ -14,7 +14,7 @@
 
 *Inspired by CRIS and IRCTC · Independent project*
 
-> **Version:** 1.0 | **Date:** 2026-10-16 | **Document ID:** SRIS-P1-ARCH-005
+> **Version:** 1.1 | **Date:** 2026-10-22 | **Document ID:** SRIS-P1-ARCH-005
 
 | Field              | Value                                                             |
 | ------------------ | ----------------------------------------------------------------- |
@@ -27,12 +27,12 @@
 | Document Type      | Architecture Document                                             |
 | Milestone          | Phase 1 Foundation                                                |
 | Classification     | Internal                                                          |
-| Version            | 1.0                                                               |
+| Version            | 1.1                                                               |
 | Date               | 2026-10-16                                                        |
 | Author             | Koushal Jha, Lead Architect                                       |
 | Approved By        | Koushal Jha, Lead Architect                                       |
-| Approval Date      | 2026-10-16                                                        |
-| Supersedes         | None (first version)                                              |
+| Approval Date      | 2026-10-22                                                        |
+| Supersedes         | Version 1.0 of this document                                      |
 | Related Documents  | See Appendix B                                                    |
 | Affiliation        | Independent · Not affiliated with CRIS, IRCTC, or Indian Railways |
 
@@ -51,7 +51,7 @@
    - [2.3 How to Read This Document](#23-how-to-read-this-document)
    - [2.4 The Citation Pattern](#24-the-citation-pattern)
    - [2.5 The Format of an Aggregate Entry](#25-the-format-of-an-aggregate-entry)
-   - [2.6 The 15 Aggregate Decisions](#26-the-15-aggregate-decisions)
+   - [2.6 The 14 Aggregate Decisions](#26-the-14-aggregate-decisions)
 3. [Identity and Access](#3-identity-and-access)
    - [3.1 UserAccount](#31-useraccount)
    - [3.2 Session](#32-session)
@@ -72,7 +72,7 @@
    - [7.1 Booking](#71-booking)
    - [7.2 Passenger (Child Entity)](#72-passenger-child-entity)
 8. [Payment](#8-payment)
-   - [8.1 PaymentAttempt](#81-paymentattempt)
+   - [8.1 Payment Tracking (Declassified as Aggregate)](#81-payment-tracking-declassified-as-aggregate)
 9. [Notification](#9-notification)
    - [9.1 NotificationRecord](#91-notificationrecord)
 10. [Search and Discovery](#10-search-and-discovery)
@@ -109,7 +109,7 @@ This document answers a single question: what does the business consist of, and 
 - How to read this document without prior knowledge of the register.
 - The citation pattern used when another document is referenced.
 - The format of an aggregate entry.
-- The 15 aggregate decisions for Phase 1.
+- The 14 aggregate decisions for Phase 1.
 - For each aggregate: its definition, its conceptual state, its references by identity, its invariants, its value objects, its state machine, its state transitions, its domain events, and its cross-context events.
 - The eight cross-context integration events of Phase 1.
 - The aggregate-to-capability and aggregate-to-service traceability.
@@ -252,9 +252,9 @@ The pattern is not used in Appendix B, whose tables list Document IDs and titles
 
 Every aggregate in Sections 3 to 9 is presented in the format described in Section 2.3. The format is consistent across all 14 aggregates.
 
-### 2.6 The 15 Aggregate Decisions
+### 2.6 The 14 Aggregate Decisions
 
-The 15 aggregate decisions for Phase 1 are recorded in [SRIS-P1-ARCH-007](./SRIS-P1-ARCH-007_ArchitectureDecisionRecordsMasterIndex.md) — Architecture Decision Records — Master Index. They are repeated here in summary, without their rationale.
+The 14 aggregate decisions for Phase 1 are recorded in [SRIS-P1-ARCH-007](./SRIS-P1-ARCH-007_ArchitectureDecisionRecordsMasterIndex.md) — Architecture Decision Records — Master Index. They are repeated here in summary, without their rationale.
 
 | # | Aggregate | Bounded Context | Owning Service |
 | - | --------- | --------------- | -------------- |
@@ -270,13 +270,12 @@ The 15 aggregate decisions for Phase 1 are recorded in [SRIS-P1-ARCH-007](./SRIS
 | 10 | CoachInventory | Inventory and Quota | S3 Reservation Service (Inventory module) |
 | 11 | WaitlistQueue | Inventory and Quota | S3 Reservation Service (Inventory module) |
 | 12 | Booking | Booking and Ticketing | S3 Reservation Service (Booking module) |
-| 13 | PaymentAttempt | Payment | S5 Mock Payment Gateway |
-| 14 | NotificationRecord | Notification | S6 Notification Service |
-| 15 | Search and Discovery | Search and Discovery | S4 Search Aggregator BFF (zero aggregates) |
+| 13 | NotificationRecord | Notification | S6 Notification Service |
+| 14 | Search and Discovery | Search and Discovery | S4 Search Aggregator BFF (zero aggregates) |
 
 The FareQuote value object is not an aggregate. It is transient and produced by the pricing service on demand. It is documented in [Section 5.3](#53-farequote-value-object).
 
-Rows 1 through 14 of the table are aggregates. Row 15 is a domain that has been analysed and found to require no aggregates, and it is listed so that the reader sees the analysis was performed rather than skipped.
+Rows 1 through 13 of the table are aggregates. Row 14 is a domain that has been analysed and found to require no aggregates, and it is listed so that the reader sees the analysis was performed rather than skipped.
 
 ---
 
@@ -438,8 +437,6 @@ The Session refers to exactly one UserAccount, by the identity of that account. 
 | :----------- | :------------------------------------------------------------------ |
 | Token        | The opaque credential presented by the client on each request.      |
 | RefreshToken | The credential used to obtain a new Token without re-authenticating. |
-
-#### State Machine
 
 #### State Machine
 
@@ -1003,8 +1000,6 @@ None. A TariffRule is a top-level pricing aggregate and does not refer to any ot
 
 #### State Machine
 
-#### State Machine
-
 ```mermaid
 stateDiagram-v2
     state "In Effect" as InEffect
@@ -1314,7 +1309,7 @@ Every state change at the seat level that affects the availability of the seat p
 | Event                | Source                  | Action                                                                   |
 | :------------------- | :---------------------- | :----------------------------------------------------------------------- |
 | BookingCancelled     | S3 Booking module       | Release the seat segments held by the cancelled booking and return them to the pool. |
-| PaymentAttemptFailed | S5 Mock Payment Gateway | Release any seats held by the failed booking attempt and return them to the pool.    |
+| PaymentAttemptFailed | S5 Payment Gateway | Release any seats held by the failed booking attempt and return them to the pool.    |
 
 Both rows are cross-aggregate policies within S3 Reservation Service and across to S5. The CoachInventory cannot observe a booking cancellation or a payment failure on its own, so these are enforced through the event flow.
 
@@ -1442,7 +1437,7 @@ Both rows are cross-aggregate policies within S3 Reservation Service. The Waitli
 
 The Booking and Ticketing domain is owned by the Booking module of S3 Reservation Service. It contains one aggregate, Booking, and one child entity, Passenger. A Booking is the record of a customer's intent to travel on a specific train, on a specific date, in a specific class and quota, for one or more passengers. The Booking aggregate is the entry point for the customer's interaction with the seat inventory, the payment gateway, and the notification service.
 
-A Booking does not own the seats it reserves. The seats are owned by the CoachInventory aggregate. A Booking holds references by identity to the CoachInventory, the TrainSchedule, and the PaymentAttempt that it depends on, and it relies on the event flow to keep its own state consistent with those aggregates.
+A Booking does not own the seats it reserves. The seats are owned by the CoachInventory aggregate. A Booking holds references by identity to the CoachInventory, the TrainSchedule, and the `payment_inflight` record that it depends on, and it relies on the event flow to keep its own state consistent with those aggregates.
 
 The capabilities of the domain are recorded in [SRIS-P1-REQ-003](../wave-1-requirements/SRIS-P1-REQ-003_CapabilityCatalogFinal.md) — Capability Catalog (Final), which lists the 30 business capabilities Phase 1 provides. The software requirements are recorded in [SRIS-P1-REQ-004](../wave-1-requirements/SRIS-P1-REQ-004_SoftwareRequirementsSpecificationSRS.md) — Software Requirements Specification (SRS), which states what the software must do.
 
@@ -1466,7 +1461,7 @@ PNR, BookingFareSnapshot.
 
 #### References by Identity
 
-The Booking refers to exactly one UserAccount, by the identity of that account, to exactly one TrainSchedule, by the identity of that schedule, to exactly one CoachInventory, by the identity of that inventory, and to exactly one PaymentAttempt, by the identity of that attempt. It does not hold object references to any of these aggregates.
+The Booking refers to exactly one UserAccount, by the identity of that account, to exactly one TrainSchedule, by the identity of that schedule, to exactly one CoachInventory, by the identity of that inventory, and to exactly one `payment_inflight` record, by the identity of that record. It does not hold object references to any of these aggregates.
 
 #### Conceptual State
 
@@ -1476,7 +1471,7 @@ The Booking refers to exactly one UserAccount, by the identity of that account, 
 | Customer        | The identity of the UserAccount that made the booking.                       |
 | Train schedule  | The identity of the TrainSchedule the booking is for.                        |
 | Coach inventory | The identity of the CoachInventory that holds the seats.                     |
-| Payment attempt | The identity of the PaymentAttempt associated with the booking.              |
+| Payment tracking | The identity of the payment_inflight record associated with the booking.    |
 | Passengers      | The set of Passenger child entities that compose the booking.                |
 | Journey details | The origin, the destination, and the journey date.                           |
 | Class and quota | The class of travel and the quota in which the booking is made.              |
@@ -1572,10 +1567,9 @@ Every state change publishes exactly one event, in accordance with PN-002. The t
 
 | Event                   | Source                  | Action                                                                                                     |
 | :---------------------- | :---------------------- | :--------------------------------------------------------------------------------------------------------- |
-| PaymentAttemptSucceeded | S5 Mock Payment Gateway | Transition the booking from Held or Initiated to Confirmed, and assign the PNR and fare snapshot.          |
-| PaymentAttemptFailed    | S5 Mock Payment Gateway | Transition the booking to Failed, and release the seat segments held by the booking.                        |
-| PaymentAttemptReversed  | S5 Mock Payment Gateway | Record the reversal and transition the booking from Cancelled to Refunded.                                  |
-| WaitlistEntryPromoted   | S3 Inventory module     | Transition the booking from Waitlisted or RAC to Confirmed, and record the newly allocated seat.            |
+| PaymentAttemptSucceeded | S5 Payment Gateway | Transition the booking from Held or Initiated to Confirmed, and assign the PNR and fare snapshot.          |
+| PaymentAttemptFailed    | S5 Payment Gateway | Transition the booking to Failed, and release the seat segments held by the booking.                        |
+| PaymentAttemptReversed  | S5 Payment Gateway | Record the reversal and transition the booking from Cancelled to Refunded.                                  |
 
 Every row is a cross-aggregate policy. The Booking cannot observe a payment result or a waitlist promotion on its own, so these are enforced through the event flow. The mechanics of the event flow are owned by [SRIS-P1-ARCH-009](./SRIS-P1-ARCH-009_ServiceInteractionAndCommunicationDesign.md) — Service Interaction and Communication Design.
 
@@ -1691,19 +1685,19 @@ None. The Passenger is a child entity and does not consume events. The parent Bo
 
 ## 8. Payment
 
-The Payment domain is owned by S5 Mock Payment Gateway. It contains one aggregate, PaymentAttempt. The mock gateway exists so that Phase 1 can demonstrate the payment lifecycle without contacting a real payment provider. It has the same lifecycle as a real provider would have, and it can be replaced in a later phase without changing the domain model.
+The Payment domain is a boundary, not a bounded context. The payment attempt tracking record — named `payment_inflight` — is owned by S3 Reservation Service (Booking module) and stored inside `sris_reservation`, alongside the Booking aggregate. S5 Payment Gateway is the external system boundary that processes payment requests and returns results; it holds no persistent payment state. The tracker inside S3 records the attempt, its amount, its idempotency key, its transaction reference, and its lifecycle (Initiated → Succeeded → Failed → Reversed). In Phase 1, S5 is configured as a simulator; in Phase 2, it is repointed to a real provider by configuration alone, without a change of service identity.
 
 The capabilities of the domain are recorded in [SRIS-P1-REQ-003](../wave-1-requirements/SRIS-P1-REQ-003_CapabilityCatalogFinal.md) — Capability Catalog (Final), which lists the 30 business capabilities Phase 1 provides. The software requirements are recorded in [SRIS-P1-REQ-004](../wave-1-requirements/SRIS-P1-REQ-004_SoftwareRequirementsSpecificationSRS.md) — Software Requirements Specification (SRS), which states what the software must do.
 
-### 8.1 PaymentAttempt
+### 8.1 Payment Tracking (Declassified as Aggregate)
 
 #### Definition
 
-A PaymentAttempt is a single attempt to pay for a booking through the mock payment gateway. It records the amount, the currency, the idempotency key, the outcome, and the reference to the booking it belongs to. A PaymentAttempt is an aggregate because it has its own transactional lifecycle: it is initiated, it either succeeds, fails, or is reversed, and each of those states has consequences for the booking that triggered the attempt.
+A payment_inflight record is a single attempt to pay for a booking, tracked by S3 Reservation Service. It records the amount, the currency, the idempotency key, the outcome, and the reference to the booking it belongs to. It is not a domain aggregate; it is an internal Saga orchestration record, owned by S3 and stored in `sris_reservation` alongside the Booking aggregate. Its lifecycle (Initiated → Succeeded → Failed → Reversed) is enforced by the Saga Orchestrator (ARCH-015), not by an independent aggregate root. This choice aligns with ARCH-015 §3, which already showed S3 writing the record inside its own `@Transactional` boundary, and it eliminates the fifth logical database that would otherwise be required.
 
 #### Aggregate Root
 
-Yes. The PaymentAttempt is an aggregate root.
+No. Payment tracking is not an aggregate. It is a record (`payment_inflight`) owned by the Booking module of S3 Reservation Service.
 
 #### Child Entities
 
@@ -1715,13 +1709,13 @@ Money, IdempotencyKey.
 
 #### References by Identity
 
-The PaymentAttempt refers to exactly one Booking, by the identity of that booking. It does not hold an object reference to the Booking aggregate.
+The payment_inflight record refers to exactly one Booking, by the identity of that booking. It does not hold an object reference to the Booking aggregate.
 
 #### Conceptual State
 
 | Concept               | Meaning                                                                  |
 | :-------------------- | :----------------------------------------------------------------------- |
-| Attempt identity      | The unique identity of this payment attempt, assigned at creation.        |
+| Record identity       | The unique identity of this payment_inflight record, assigned at creation. |
 | Booking               | The identity of the Booking this attempt is for.                         |
 | Amount                | The monetary amount of the attempt, with its currency.                    |
 | Idempotency key       | The unique key that guarantees a repeated request returns the same result. |
@@ -1731,15 +1725,15 @@ The PaymentAttempt refers to exactly one Booking, by the identity of that bookin
 
 #### Invariants
 
-| ID        | Invariant                                                                                       | Source                                                                                                                                          |
-| :-------- | :---------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------- |
-| INV-PA-01 | Every PaymentAttempt has a unique idempotency key.                                              | [SRIS-P1-API-005](../wave-3-detailed-design/SRIS-P1-API-005_IdempotencyAndRetryPolicySpecification.md) — Idempotency and Retry Policy Specification |
-| INV-PA-02 | The amount of a PaymentAttempt equals the fare snapshot total of its Booking.                    | [SRIS-P1-REQ-004](../wave-1-requirements/SRIS-P1-REQ-004_SoftwareRequirementsSpecificationSRS.md) SR-080                                          |
-| INV-PA-03 | The amount of a PaymentAttempt is strictly positive.                                            | [SRIS-P1-REQ-004](../wave-1-requirements/SRIS-P1-REQ-004_SoftwareRequirementsSpecificationSRS.md) SR-080                                          |
-| INV-PA-04 | The status of a PaymentAttempt is one of: Initiated, Succeeded, Failed, Reversed.                | [SRIS-P1-REQ-004](../wave-1-requirements/SRIS-P1-REQ-004_SoftwareRequirementsSpecificationSRS.md) SR-084                                          |
-| INV-PA-05 | A Failed PaymentAttempt is terminal and cannot transition to Succeeded.                         | [SRIS-P1-REQ-004](../wave-1-requirements/SRIS-P1-REQ-004_SoftwareRequirementsSpecificationSRS.md) SR-084                                          |
-| INV-PA-06 | A Reversed PaymentAttempt must have been Succeeded before reversal.                             | [SRIS-P1-REQ-004](../wave-1-requirements/SRIS-P1-REQ-004_SoftwareRequirementsSpecificationSRS.md) SR-086                                          |
-| INV-PA-07 | A second attempt with the same idempotency key returns the same result as the first.             | [SRIS-P1-REQ-004](../wave-1-requirements/SRIS-P1-REQ-004_SoftwareRequirementsSpecificationSRS.md) SR-085                                          |
+| ID        | Invariant                                                                                          | Source                                                                                                                                          |
+| :-------- | :------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------- |
+| INV-BK-11 | Every payment_inflight record has a unique idempotency key.                                        | [SRIS-P1-API-005](../wave-3-detailed-design/SRIS-P1-API-005_IdempotencyAndRetryPolicySpecification.md) — Idempotency and Retry Policy Specification |
+| INV-BK-12 | The amount of a payment_inflight record equals the fare snapshot total of its Booking.              | [SRIS-P1-REQ-004](../wave-1-requirements/SRIS-P1-REQ-004_SoftwareRequirementsSpecificationSRS.md) SR-080                                          |
+| INV-BK-13 | The amount of a payment_inflight record is strictly positive.                                       | [SRIS-P1-REQ-004](../wave-1-requirements/SRIS-P1-REQ-004_SoftwareRequirementsSpecificationSRS.md) SR-080                                          |
+| INV-BK-14 | The status of a payment_inflight record is one of: Initiated, Succeeded, Failed, Reversed.          | [SRIS-P1-REQ-004](../wave-1-requirements/SRIS-P1-REQ-004_SoftwareRequirementsSpecificationSRS.md) SR-084                                          |
+| INV-BK-15 | A Failed payment_inflight record is terminal and cannot transition to Succeeded.                   | [SRIS-P1-REQ-004](../wave-1-requirements/SRIS-P1-REQ-004_SoftwareRequirementsSpecificationSRS.md) SR-084                                          |
+| INV-BK-16 | A Reversed payment_inflight record must have been Succeeded before reversal.                       | [SRIS-P1-REQ-004](../wave-1-requirements/SRIS-P1-REQ-004_SoftwareRequirementsSpecificationSRS.md) SR-086                                          |
+| INV-BK-17 | A second attempt with the same idempotency key returns the same result as the first.                | [SRIS-P1-REQ-004](../wave-1-requirements/SRIS-P1-REQ-004_SoftwareRequirementsSpecificationSRS.md) SR-085                                          |
 
 #### Value Objects Used
 
@@ -1764,10 +1758,10 @@ stateDiagram-v2
 
 | From      | To        | Trigger                          | Notes                                                                                                    |
 | :-------- | :-------- | :------------------------------- | :------------------------------------------------------------------------------------------------------- |
-| Initiated | Succeeded | Gateway confirms success         | The amount must equal the fare snapshot total of the booking (INV-PA-02). The transaction reference is recorded. |
-| Initiated | Failed    | Gateway reports failure          | The failure reason code is recorded. Failed is terminal (INV-PA-05).                                      |
-| Succeeded | Reversed  | Reversal requested and processed | A Reversed attempt must have been Succeeded before reversal (INV-PA-06).                                  |
-| Failed    | (none)    | —                                | Failed is terminal. No transition out of Failed is permitted (INV-PA-05).                                  |
+| Initiated | Succeeded | Gateway confirms success         | The amount must equal the fare snapshot total of the booking (INV-BK-12). The transaction reference is recorded. |
+| Initiated | Failed    | Gateway reports failure          | The failure reason code is recorded. Failed is terminal (INV-BK-15).                                      |
+| Succeeded | Reversed  | Reversal requested and processed | A Reversed attempt must have been Succeeded before reversal (INV-BK-16).                                  |
+| Failed    | (none)    | —                                | Failed is terminal. No transition out of Failed is permitted (INV-BK-15).                                  |
 | Reversed  | (none)    | —                                | Reversed is terminal.                                                                                      |
 
 #### Domain Events Published
@@ -1784,15 +1778,15 @@ Every state change publishes exactly one event, in accordance with PN-002. The t
 
 | Event            | Source            | Action                                                                                                     |
 | :--------------- | :---------------- | :--------------------------------------------------------------------------------------------------------- |
-| BookingCancelled | S3 Booking module | The payment attempt associated with the cancelled booking is marked for reversal if the amount had been captured. |
+| BookingCancelled | S3 Booking module | The payment_inflight record associated with the cancelled booking is marked for reversal if the amount had been captured. |
 
 This row is a cross-aggregate policy. The PaymentAttempt cannot observe a booking cancellation on its own, so the rule is enforced through the event flow. The mechanics of that flow are owned by [SRIS-P1-ARCH-009](./SRIS-P1-ARCH-009_ServiceInteractionAndCommunicationDesign.md) — Service Interaction and Communication Design.
 
 #### Traceability
 
-| Capability       | Software Requirements | Business Rules                            |
-| :--------------- | :-------------------- | :---------------------------------------- |
-| CAP-025, CAP-026 | SR-080 to SR-087      | BR-16, BR-17, BR-18, BR-19, BRL-2, BRL-6  |
+| Capability       | Software Requirements | Business Rules                            | Owning Service                    |
+| :--------------- | :-------------------- | :---------------------------------------- | :-------------------------------- |
+| CAP-025, CAP-026 | SR-080 to SR-087      | BR-16, BR-17, BR-18, BR-19, BRL-2, BRL-6  | S3 Reservation Service (Booking)  |
 
 ---
 
@@ -1893,7 +1887,7 @@ None. The NotificationRecord is a terminal consumer. It does not publish domain 
 | BookingWaitlisted      | S3 Booking module       | Render and queue a waitlist notification to the customer.                   |
 | BookingCancelled       | S3 Booking module       | Render and queue a cancellation notification to the customer.               |
 | WaitlistEntryPromoted  | S3 Inventory module     | Render and queue a waitlist promotion notification to the customer.         |
-| PaymentAttemptReversed | S5 Mock Payment Gateway | Render and queue a refund notification to the customer.                     |
+| PaymentAttemptReversed | S5 Payment Gateway | Render and queue a refund notification to the customer.                     |
 | UserAccountRegistered  | S1 IAM Service          | Render and queue a registration welcome notification to the new account holder. |
 
 Every row is a cross-context policy. The NotificationRecord cannot act on its own for these events; it reacts to what other bounded contexts publish. Duplicate deliveries of the same source event are suppressed by INV-NR-02. The mechanics of the event flow are owned by [SRIS-P1-ARCH-009](./SRIS-P1-ARCH-009_ServiceInteractionAndCommunicationDesign.md) — Service Interaction and Communication Design.
@@ -1947,11 +1941,11 @@ This section defines the cross-context integration events of Phase 1. These are 
 | - | :---------------------- | :---------------------- | :--------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1 | BookingConfirmed        | S3 Booking module       | S6 Notification Service                                                | Booking identity; PNR; journey date; origin and destination station codes and names; train number and name; class of travel; passenger list with names, ages, genders, and assigned berths; coach and berth positions; total fare paid; customer identity, email address, and phone number; timestamp of confirmation.                                                                                                                                                                                                          |
 | 2 | BookingWaitlisted       | S3 Booking module       | S6 Notification Service                                                | Booking identity; PNR; customer identity and contact details; journey date; train number and name; origin and destination; waitlist position; class and quota.                                                                                                                                                                                                                                                                                                                                                                |
-| 3 | BookingCancelled        | S3 Booking module       | S3 Inventory module; S5 Mock Payment Gateway; S6 Notification Service  | Booking identity; PNR; cancelled passenger identifiers; journey date; released seat segments; refund amount where applicable; timestamp.                                                                                                                                                                                                                                                                                                                                                                                     |
+| 3 | BookingCancelled        | S3 Booking module       | S3 Inventory module; S5 Payment Gateway; S6 Notification Service  | Booking identity; PNR; cancelled passenger identifiers; journey date; released seat segments; refund amount where applicable; timestamp.                                                                                                                                                                                                                                                                                                                                                                                     |
 | 4 | WaitlistEntryPromoted   | S3 Inventory module     | S3 Booking module; S6 Notification Service                             | Queue identity; entry identity; associated booking identity; PNR; new status (RAC or Confirmed); new seat allocation; customer contact details for notification; timestamp.                                                                                                                                                                                                                                                                                                                                                   |
-| 5 | PaymentAttemptSucceeded | S5 Mock Payment Gateway | S3 Booking module                                                      | Booking identity; idempotency key; transaction reference; amount; currency; timestamp of success.                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| 6 | PaymentAttemptFailed    | S5 Mock Payment Gateway | S3 Booking module                                                      | Booking identity; idempotency key; failure reason code; amount attempted; timestamp of failure.                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| 7 | PaymentAttemptReversed  | S5 Mock Payment Gateway | S3 Booking module; S6 Notification Service                             | Booking identity; original transaction reference; reversed amount; currency; customer contact details; timestamp of reversal.                                                                                                                                                                                                                                                                                                                                                                                                  |
+| 5 | PaymentAttemptSucceeded | S5 Payment Gateway | S3 Booking module                                                      | Booking identity; idempotency key; transaction reference; amount; currency; timestamp of success.                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| 6 | PaymentAttemptFailed    | S5 Payment Gateway | S3 Booking module                                                      | Booking identity; idempotency key; failure reason code; amount attempted; timestamp of failure.                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| 7 | PaymentAttemptReversed  | S5 Payment Gateway | S3 Booking module; S6 Notification Service                             | Booking identity; original transaction reference; reversed amount; currency; customer contact details; timestamp of reversal.                                                                                                                                                                                                                                                                                                                                                                                                  |
 | 8 | UserAccountRegistered   | S1 IAM Service          | S6 Notification Service                                                | Account identity; role assigned; email address; display name if provided; timestamp of registration.                                                                                                                                                                                                                                                                                                                                                                                                                          |
 
 ### 11.2 Event Naming and Payload Rules
@@ -2008,9 +2002,8 @@ The table below maps every aggregate and value object in Phase 1 to the capabili
 | 12 | WaitlistQueue                         | CAP-021, CAP-022                                | Inventory and Quota  |
 | 13 | Booking                               | CAP-019, CAP-020, CAP-021, CAP-023, CAP-024     | Booking and Ticketing |
 | 14 | Passenger (child entity of Booking)   | CAP-019                                         | Booking and Ticketing |
-| 15 | PaymentAttempt                        | CAP-025, CAP-026                                | Payment              |
-| 16 | NotificationRecord                    | CAP-029, CAP-030                                | Notification         |
-| 17 | Search and Discovery (zero aggregates) | CAP-027, CAP-028                               | Search and Discovery |
+| 15 | NotificationRecord                    | CAP-029, CAP-030                                | Notification         |
+| 16 | Search and Discovery (zero aggregates) | CAP-027, CAP-028                               | Search and Discovery |
 
 [SRIS-P1-REQ-003](../wave-1-requirements/SRIS-P1-REQ-003_CapabilityCatalogFinal.md) — Capability Catalog (Final) remains the authoritative record of what each capability identifier means. This table records only which aggregate or value object in the domain model is responsible for serving that capability.
 
@@ -2044,11 +2037,10 @@ The table below maps every aggregate in Phase 1 to the service that owns it, and
 | 12 | WaitlistQueue                         | S3 Reservation Service             | Inventory module           |
 | 13 | Booking                               | S3 Reservation Service             | Booking module             |
 | 14 | Passenger (child entity of Booking)   | S3 Reservation Service             | Booking module             |
-| 15 | PaymentAttempt                        | S5 Mock Payment Gateway            | —                          |
-| 16 | NotificationRecord                    | S6 Notification Service            | —                          |
-| 17 | Search and Discovery (zero aggregates) | S4 Search Aggregator BFF          | —                          |
+| 15 | NotificationRecord                    | S6 Notification Service            | —                          |
+| 16 | Search and Discovery (zero aggregates) | S4 Search Aggregator BFF          | —                          |
 
-The dash in the Module column marks a service that has no internal module, as defined in [SRIS-P1-ARCH-001](./SRIS-P1-ARCH-001_MicroservicesIdentification.md) — Microservices Identification. Only S2 and S3 have documented internal modules in Phase 1. S1 IAM Service is a single-purpose identity service, S4 Search Aggregator BFF is a read-only composition layer, S5 Mock Payment Gateway is an external system simulator, and S6 Notification Service is a single-purpose terminal consumer. No other service carries a module boundary.
+The dash in the Module column marks a service that has no internal module, as defined in [SRIS-P1-ARCH-001](./SRIS-P1-ARCH-001_MicroservicesIdentification.md) — Microservices Identification. Only S2 and S3 have documented internal modules in Phase 1. S1 IAM Service is a single-purpose identity service, S4 Search Aggregator BFF is a read-only composition layer, S5 Payment Gateway is an external system boundary, and S6 Notification Service is a single-purpose terminal consumer. No other service carries a module boundary. The `payment_inflight` record is not an aggregate and is not listed in this table; it lives inside the Booking module of S3 Reservation Service, alongside the Booking aggregate.
 
 No aggregate is shared across services. Every aggregate belongs to exactly one bounded context, is owned by exactly one service, and sits inside exactly one module where that service has modules. This follows the principle of bounded context first and the principle of own your data, both recorded in [SRIS-P1-ARCH-002](./SRIS-P1-ARCH-002_ArchitecturePrinciples.md) — Architecture Principles.
 
@@ -2058,7 +2050,7 @@ A note on dynamic pricing (PN-010). Dynamic pricing is modelled in Phase 1 as an
 
 | Role           | Name        | Decision | Date       |
 | -------------- | ----------- | -------- | ---------- |
-| Lead Architect | Koushal Jha | Approved | 2026-10-16 |
+| Lead Architect | Koushal Jha | Approved | 2026-10-22 |
 
 ---
 
@@ -2067,6 +2059,10 @@ A note on dynamic pricing (PN-010). Dynamic pricing is modelled in Phase 1 as an
 | Version | Date       | Author      | Change           |
 | ------- | ---------- | ----------- | ---------------- |
 | 1.0     | 2026-10-16 | Koushal Jha | Initial release. |
+| Version | Date       | Author      | Change           |
+| ------- | ---------- | ----------- | ---------------- |
+| 1.0     | 2026-10-16 | Koushal Jha | Initial release. |
+| 1.1     | 2026-10-22 | Koushal Jha | Deleted the PaymentAttempt aggregate (Conflict C-3 resolution, Option C). Payment tracking now lives as `payment_inflight` in `sris_reservation` under S3's Booking module. The seven invariants INV-PA-01 to INV-PA-07 were renumbered INV-BK-11 to INV-BK-17 and reworded to describe the `payment_inflight` record. Aggregate count changed from 15 to 14 (§2.6, §1.2). S5 renamed to "Payment Gateway" throughout (§6.1, §7.1, §9.1, §11.1). Removed duplicate "State Machine" headings in §3.2 and §5.1. |
 
 ---
 
