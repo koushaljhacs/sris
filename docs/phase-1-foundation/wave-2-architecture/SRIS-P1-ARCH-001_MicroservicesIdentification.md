@@ -14,7 +14,7 @@
 
 *Inspired by CRIS and IRCTC · Independent project*
 
-> **Version:** 1.1 | **Date:** 2026-10-11 | **Document ID:** SRIS-P1-ARCH-001
+> **Version:** 1.2 | **Date:** 2026-10-22 | **Document ID:** SRIS-P1-ARCH-001
 
 | Field              | Value                                                             |
 | ------------------ | ----------------------------------------------------------------- |
@@ -27,12 +27,12 @@
 | Document Type      | Architecture Decision Document                                    |
 | Milestone          | Phase 1 Foundation                                                |
 | Classification     | Internal                                                          |
-| Version            | 1.1                                                               |
-| Date               | 2026-10-11                                                        |
+| Version            | 1.2                                                               |
+| Date               | 2026-10-22                                                        |
 | Author             | Koushal Jha, Lead Architect                                       |
 | Approved By        | Koushal Jha, Lead Architect                                       |
-| Approval Date      | 2026-10-11                                                        |
-| Supersedes         | Version 1.0 of this document                                      |
+| Approval Date      | 2026-10-22                                                        |
+| Supersedes         | Version 1.1 of this document                                      |
 | Related Documents  | See Appendix B                                                    |
 | Affiliation        | Independent · Not affiliated with CRIS, IRCTC, or Indian Railways |
 
@@ -93,7 +93,7 @@ This document records the outcome of the task **Microservices Identification for
 - finalizes the deployable microservices for Phase 1, and
 - justifies the grouping and the final count.
 
-**Outcome:** Phase 1 Foundation requires **six** microservices: IAM, Master Data and Pricing, Reservation, Search Aggregator BFF, Mock Payment Gateway, and Notification.
+**Outcome:** Phase 1 Foundation requires **six** microservices: IAM, Master Data and Pricing, Reservation, Search Aggregator BFF, Payment Gateway Service, and Notification.
 
 SRIS (Sarathi Railway Information System) is an independent unified railway management platform built under the codename Project Sarathi. The word "Sarathi" is Sanskrit for "charioteer" — the guide who steers but does not own the journey. SRIS is inspired by the architecture and systems of CRIS and the booking experience of IRCTC, but is not affiliated with either organization.
 
@@ -266,7 +266,7 @@ These six are the **Phase 1 Foundation count**. They are not the final count for
 | S2  | Master Data and Pricing Service | Supporting         | Railway Master Data, Fare and Pricing      | Single source of truth for railway configuration and fare rules |
 | S3  | Reservation Service             | **Core**           | Inventory and Quota, Booking and Ticketing | Seat inventory and the booking state machine                    |
 | S4  | Search Aggregator BFF           | Supporting         | Search and Discovery                       | One unified search API for client applications                  |
-| S5  | Mock Payment Gateway            | External simulator | Payment (external system)                  | Simulate third-party payment processing                         |
+| S5  | Payment Gateway Service         | External simulator | Payment (external system)                  | Process payment attempts and return the provider result         |
 | S6  | Notification Service            | Generic            | Notification and Eventing                  | Asynchronous user alerts from domain events                     |
 
 ### 6.2 Service Specifications
@@ -296,7 +296,7 @@ These six are the **Phase 1 Foundation count**. They are not the final count for
   - **Inventory module:** seat matrix generation, quota allocation, availability, seat hold, confirm, and release.
   - **Booking module:** booking state machine, PNR generation, waitlist cascade, chart preparation, cancellation, ticket retrieval, payment attempt tracking, and verification of the payment callback (behind an anti-corruption layer facing the payment gateway).
 - **Owns:** Seat inventory, bookings, passengers, PNRs, waitlist, payment attempt records.
-- **Depends on:** Master Data and Pricing (schedule, coach layout, fare re-quote), Mock Payment Gateway (outbound payment request).
+- **Depends on:** Master Data and Pricing (schedule, coach layout, fare re-quote), Payment Gateway Service (outbound payment request).
 - **Used by:** Search BFF (availability), clients (booking operations).
 - **Publishes:** Domain events (for example, booking confirmed) for Notification.
 - **Not responsible for:** Fare calculation. The booking uses a fare re-quoted by Master Data and Pricing at booking time, not a price supplied by search.
@@ -309,12 +309,12 @@ These six are the **Phase 1 Foundation count**. They are not the final count for
 - **Depends on:** S2, S3.
 - **Not responsible for:** Any state change. It is read-only.
 
-#### S5: Mock Payment Gateway
+#### S5: Payment Gateway Service
 
-- **Purpose:** Stand in for an external payment provider so the flow can be built and demonstrated without real money.
-- **Responsibilities:** Process a dummy payment with configurable outcomes and return a signed result callback (webhook) to Reservation.
-- **Owns:** Simulated transaction records only.
-- **Classification:** An **external system simulator**, not a domain bounded context. Reservation talks to it through an anti-corruption layer, so it can be replaced by a real gateway without changing the domain.
+- **Purpose:** Provide the payment processing boundary of the system. In Phase 1 it is configured as a simulator; in Phase 2 it is repointed to a real provider by configuration alone, without a change of service identity.
+- **Responsibilities:** Process payment attempts, return a signed result callback (webhook) to Reservation, and reverse a payment on compensation. The provider behind the service is a configuration concern, not an identity concern.
+- **Owns:** In Phase 1, simulated transaction records only. The payment attempt tracking record lives in S3's reservation database (`payment_inflight`), not in S5.
+- **Classification:** An **external system boundary**, not a domain bounded context. Reservation talks to it through an anti-corruption layer (ARCH-004 §5.4), so a real provider can be integrated without changing the domain.
 
 #### S6: Notification Service
 
@@ -331,7 +331,7 @@ These six are the **Phase 1 Foundation count**. They are not the final count for
 | S2 Master Data and Pricing | Railway Master Data; Fare and Pricing                             | none                                   |
 | S3 Reservation             | Inventory and Quota; Booking and Ticketing; Payment (domain side) | Refunds; reconciliation and settlement |
 | S4 Search BFF              | Search and Discovery                                              | none                                   |
-| S5 Mock Payment Gateway    | Payment (simulator side)                                          | none                                   |
+| S5 Payment Gateway         | Payment (provider side)                                           | none                                   |
 | S6 Notification            | Notification                                                      | In-app and push notifications          |
 
 Each Phase 1 capability has exactly one owning service. The Payment domain is split by role: the domain side belongs to S3, and the simulator side belongs to S5.
@@ -348,7 +348,7 @@ flowchart LR
   BFF -->|"schedule, fare"| MD
   BFF -->|"availability"| RES
   RES -->|"schedule, coach layout, fare re-quote"| MD
-  RES -->|"payment request"| PAY["S5 Mock Payment Gateway"]
+  RES -->|"payment request"| PAY["S5 Payment Gateway"]
   PAY -->|"signed result callback"| RES
   RES -.->|"domain events"| NOTIF["S6 Notification"]
 ```
@@ -358,8 +358,8 @@ flowchart LR
 | Search BFF           | Master Data and Pricing | Synchronous request/response       | Schedules and fares for a search                                                                                                     |
 | Search BFF           | Reservation             | Synchronous request/response       | Availability for a search                                                                                                            |
 | Reservation          | Master Data and Pricing | Synchronous request/response       | Schedule and coach layout for seat matrix generation, and fare re-quote at booking (final mechanism confirmed in integration design) |
-| Reservation          | Mock Payment Gateway    | Synchronous request/response       | Initiate payment                                                                                                                     |
-| Mock Payment Gateway | Reservation             | Callback (webhook)                 | Deliver payment result                                                                                                               |
+| Reservation          | Payment Gateway         | Synchronous request/response       | Initiate payment                                                                                                                     |
+| Payment Gateway      | Reservation             | Callback (webhook)                 | Deliver payment result                                                                                                               |
 | Reservation          | Notification            | Asynchronous events (event stream) | Trigger confirmations                                                                                                                |
 | All services         | IAM                     | Token validation                   | Authenticate and authorize requests                                                                                                  |
 
@@ -396,7 +396,7 @@ The count of six follows from the decision criteria D1 to D5 (section 3.2). It i
 | 2          | Merge Inventory and Quota, Booking and Ticketing, and the domain side of Payment into one Reservation Service                                                                                  | 6        | D1, D2            |
 | 3          | Merge Fare and Pricing into Railway Master Data to form the Master Data and Pricing Service                                                                                                    | 5        | D3, D5            |
 | 4          | Add the external payment gateway as a separate simulator service                                                                                                                               | 6        | M-3 (section 7.2) |
-| **Result** | IAM, Master Data and Pricing, Reservation, Search BFF, Mock Payment Gateway, Notification                                                                                                      | **6**    |                   |
+| **Result** | IAM, Master Data and Pricing, Reservation, Search BFF, Payment Gateway, Notification                                                                                                      | **6**    |                   |
 
 The count is decided by D1 to D5.
 
@@ -442,7 +442,7 @@ These are the reasons the count is not lower than six. Each pair below was teste
 | Search BFF + Reservation              | Not merged | The BFF only reads and composes. Merging it would mix client-facing composition with the core transactional service (D3).                                                                                                                                                                                                    |
 | IAM + any other service               | Not merged | A generic subdomain that every service depends on. It has a different change reason and needs security isolation (D3).                                                                                                                                                                                                       |
 | Notification + Reservation            | Not merged | Notifications must be asynchronous and must never block or fail a booking (D4).                                                                                                                                                                                                                                              |
-| Mock Payment Gateway + Reservation    | Not merged | It represents an external third party. Merging would remove the integration boundary that the anti-corruption layer protects.                                                                                                                                                                                                |
+| Payment Gateway Service + Reservation | Not merged | It represents an external system boundary. Merging would remove the integration boundary that the anti-corruption layer protects. In Phase 2, a real provider must be replaceable by configuration alone, which requires the boundary to exist as a separate service.                                                                                                       |
 
 Five services or fewer would require at least one of these merges, and each violates a decision criterion.
 
@@ -519,6 +519,7 @@ Mapped to the task definition.
 | ------- | ---------- | ----------- | ------------------------------------------------------------------------------- |
 | 1.0     | 2026-10-09 | Koushal Jha | Initial release. Approved for Phase 1 execution.                                |
 | 1.1     | 2026-10-11 | Koushal Jha | Aligned with GOV-002 template standard: removed Status everywhere, restructured metadata and appendices. |
+| 1.2     | 2026-10-22 | Koushal Jha | Renamed S5 from Mock Payment Gateway to Payment Gateway Service. S5 is the external system boundary in both phases; only its configuration changes between Phase 1 and Phase 2. §1.1, §6.1, §6.2, §6.3, §6.4, §7.1, §7.3, and Appendix A updated. |
 
 ---
 
@@ -529,7 +530,7 @@ Mapped to the task definition.
 | Fine-grained list                  | 14: Auth, Profile, Search, Inventory, Booking, Payment, Fare, Train, Station, HR, Operations, Notification, Admin, Reporting             | Initial research     | Too fine-grained; noun-based slices                                                                                                                                     |
 | Ecosystem map and Phase 1 baseline | 10 (full ecosystem) / 8 (Phase 1 baseline: IAM, Master Data and Operations, Fare, Inventory, Booking, Payment, Search BFF, Notification) | Earlier research     | Covered all capabilities, but the Phase 1 baseline carried a cross-service transactional cycle (Inventory and Booking) and a standalone Fare service, so it was revised |
 | Coarse-grained                     | 4: Core Commerce, Operations, Realtime, Admin                                                                                            | Alternative proposal | Rejected as too coarse                                                                                                                                                  |
-| **Final**                          | **6: IAM, Master Data and Pricing, Reservation, Search BFF, Mock Payment Gateway, Notification**                                         | Lead Architect       | **Selected for Phase 1**                                                                                                                                                |
+| **Final**                          | **6: IAM, Master Data and Pricing, Reservation, Search BFF, Payment Gateway, Notification**                                            | Lead Architect       | **Selected for Phase 1**                                                                                                                                                |
 
 ## Appendix B: Related Documents
 
