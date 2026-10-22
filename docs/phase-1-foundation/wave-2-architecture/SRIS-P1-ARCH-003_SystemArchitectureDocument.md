@@ -14,7 +14,7 @@
 
 *Inspired by CRIS and IRCTC · Independent project*
 
-> **Version:** 1.0 | **Date:** 2026-10-19 | **Document ID:** SRIS-P1-ARCH-003
+> **Version:** 1.1 | **Date:** 2026-10-22 | **Document ID:** SRIS-P1-ARCH-003
 
 | Field              | Value                                                             |
 | ------------------ | ----------------------------------------------------------------- |
@@ -27,12 +27,12 @@
 | Document Type      | Architecture Document                                             |
 | Milestone          | Phase 1 Foundation                                                |
 | Classification     | Internal                                                          |
-| Version            | 1.0                                                               |
-| Date               | 2026-10-19                                                        |
+| Version            | 1.1                                                               |
+| Date               | 2026-10-22                                                        |
 | Author             | Koushal Jha, Lead Architect                                       |
 | Approved By        | Koushal Jha, Lead Architect                                       |
-| Approval Date      | 2026-10-19                                                        |
-| Supersedes         | None (first version)                                              |
+| Approval Date      | 2026-10-22                                                        |
+| Supersedes         | Version 1.0 of this document                                              |
 | Related Documents  | See Appendix B                                                    |
 | Affiliation        | Independent · Not affiliated with CRIS, IRCTC, or Indian Railways |
 
@@ -150,7 +150,7 @@ Inside this single container, four isolated logical databases exist:
 4.  `sris_notification`
 
 **Strict Rules:**
-- Each service authenticates to its own database using a dedicated role. S3 cannot read `sris_iam`.
+- Each persisting service authenticates to its own database using a dedicated role. S3 cannot read `sris_iam`. S4 is a stateless read-only aggregator and has no database role. S5 is a stateless payment simulator and has no database role.
 - Direct database-to-database querying is strictly forbidden. Cross-domain data must flow through REST APIs or Redis Streams.
 - **Concurrency Control:** We explicitly **BAN** Pessimistic Locking (`SELECT ... FOR UPDATE`). All inventory updates must use **Optimistic Concurrency Control** (e.g., `UPDATE seats SET available = available - 1 WHERE available > 0`) to prevent connection pool exhaustion under extreme load.
 
@@ -180,7 +180,7 @@ flowchart TD
     
     SRIS[["SRIS Platform<br/>6 Microservices<br/>Phase 1 Foundation"]]:::system
     
-    Payment["Mock Payment Gateway<br/>External Simulator"]:::external
+    Payment["Payment Gateway<br/>External System"]:::external
     SMS["Android SMS Gateway<br/>External Simulator"]:::external
 
     %% Relationships
@@ -224,7 +224,7 @@ flowchart TD
     S2["S2 Master Data Service<br/>(Java Spring Boot)<br/>Stations, Trains, Fares"]:::backend
     S3["S3 Reservation Service<br/>(Java Spring Boot)<br/>Booking, Allocation, Saga"]:::backend
     S4["S4 Search BFF<br/>(Node.js NestJS)<br/>Aggregation & Search"]:::backend
-    S5["S5 Mock Payment<br/>(Node.js NestJS)<br/>Payment Simulator"]:::backend
+    S5["S5 Payment Gateway<br/>(Node.js NestJS)<br/>Payment Processing"]:::backend
     S6["S6 Notification Service<br/>(Node.js NestJS)<br/>Email, SMS & Python Daemon"]:::backend
 
     %% Databases
@@ -368,13 +368,7 @@ The limits below are **Provisional Targets**. They are calculated baselines deri
 
 The diagram below illustrates how the Docker containers are physically mapped onto the laptop's operating system. It explicitly shows the memory limits applied to each component and the internal Docker network that connects them.
 
-Notice that the PostgreSQL container hosts all 4 logical databases, while Nginx acts as the strict perimeter for all inbound traffic. The Python Agent runs as a sidecar inside the S6 container, monitoring the overall resource envelope.
-
-### 6.2 Physical Deployment Diagram
-
-The diagram below illustrates how the Docker containers are physically mapped onto the laptop's operating system. It explicitly shows the memory limits applied to each component and the internal Docker network that connects them.
-
-Notice the explicit data connections: S1, S2, S3, and S6 connect to their respective logical databases inside the single PostgreSQL container. S3 and S4 connect to Redis for caching and event streams. All services send metrics to Prometheus/Grafana.
+Notice that the PostgreSQL container hosts all 4 logical databases, while Nginx acts as the strict perimeter for all inbound traffic. The Python Agent runs as a sidecar inside the S6 container, monitoring the overall resource envelope. S1, S2, S3, and S6 connect to their respective logical databases inside the single PostgreSQL container. S3 and S4 connect to Redis for caching and event streams. All services send metrics to Prometheus/Grafana.
 
 ```mermaid
 %%{init: {
@@ -415,7 +409,7 @@ flowchart TD
                 S2["S2 Master Data<br/>Java | 350 MB"]:::container
                 S3["S3 Reservation<br/>Java | 350 MB"]:::container
                 S4["S4 Search BFF<br/>Node.js | 150 MB"]:::container
-                S5["S5 Mock Payment<br/>Node.js | 150 MB"]:::container
+                S5["S5 Payment Gateway<br/>Node.js | 150 MB"]:::container
                 S6["S6 Notification<br/>Node.js + Python<br/>Total: 250 MB"]:::container
             end
             
@@ -562,7 +556,7 @@ sequenceDiagram
     actor User as Customer
     participant Next as Next.js Frontend
     participant Nginx as Nginx Gateway
-    participant S5 as S5 Mock Payment
+    participant S5 as S5 Payment Gateway
     participant Stream as Redis Streams
     participant S3 as S3 Reservation (Java)
     participant DB as PostgreSQL (Reservation)
@@ -713,7 +707,7 @@ flowchart TD
 
 | Role           | Name        | Decision | Date       |
 | -------------- | ----------- | -------- | ---------- |
-| Lead Architect | Koushal Jha | Approved | 2026-10-19 |
+| Lead Architect | Koushal Jha | Approved | 2026-10-22 |
 
 ---
 
@@ -722,7 +716,7 @@ flowchart TD
 | Version | Date       | Author      | Change           |
 | ------- | ---------- | ----------- | ---------------- |
 | 1.0     | 2026-10-19 | Koushal Jha | Initial release. |
-
+| 1.1     | 2026-10-22 | Koushal Jha | Renamed S5 from Mock Payment Gateway to Payment Gateway in §3, §4, §6.2, and §7.2. Declared S4 and S5 as stateless with no database role in §2.3. Merged duplicate §6.2 heading. |
 ---
 
 ## Appendix A: Not Applicable
