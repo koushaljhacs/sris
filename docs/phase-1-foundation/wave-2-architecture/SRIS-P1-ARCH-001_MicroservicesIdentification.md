@@ -509,7 +509,7 @@ Mapped to the task definition.
 
 | Role           | Name        | Decision | Date       |
 | -------------- | ----------- | -------- | ---------- |
-| Lead Architect | Koushal Jha | Approved | 2026-10-11 |
+| Lead Architect | Koushal Jha | Approved | 2026-10-22 |
 
 ---
 
