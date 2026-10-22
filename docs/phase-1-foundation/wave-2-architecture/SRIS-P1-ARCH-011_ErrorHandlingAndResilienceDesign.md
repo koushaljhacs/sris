@@ -14,7 +14,7 @@
 
 *Inspired by CRIS and IRCTC · Independent project*
 
-> **Version:** 1.0 | **Date:** 2026-10-21 | **Document ID:** SRIS-P1-ARCH-011
+> **Version:** 1.1 | **Date:** 2026-10-22 | **Document ID:** SRIS-P1-ARCH-011
 
 | Field              | Value                                                             |
 | ------------------ | ----------------------------------------------------------------- |
@@ -27,12 +27,12 @@
 | Document Type      | Architecture Document                                             |
 | Milestone          | Phase 1 Foundation                                                |
 | Classification     | Internal                                                          |
-| Version            | 1.0                                                               |
-| Date               | 2026-10-21                                                        |
+| Version            | 1.1                                                               |
+| Date               | 2026-10-22                                                        |
 | Author             | Koushal Jha, Lead Architect                                       |
 | Approved By        | Koushal Jha, Lead Architect                                       |
-| Approval Date      | 2026-10-21                                                        |
-| Supersedes         | None (first version)                                              |
+| Approval Date      | 2026-10-22                                                        |
+| Supersedes         | Version 1.0 of this document                                      |
 | Related Documents  | See Appendix B                                                    |
 | Affiliation        | Independent · Not affiliated with CRIS, IRCTC, or Indian Railways |
 
@@ -90,7 +90,7 @@ It answers the question: **"What happens when a service is slow, a network call 
 
 - The concurrency locking primitives, which belong to [SRIS-P1-ARCH-014](./SRIS-P1-ARCH-014_DistributedConcurrencyAndLockingStrategy.md) — Distributed Concurrency and Locking Strategy.
 - The Saga orchestration logic, which belongs to [SRIS-P1-ARCH-015](./SRIS-P1-ARCH-015_DistributedTransactionAndSagaPatternDesign.md) — Distributed Transaction and Saga Pattern Design.
-- The exact error codes and RFC 7807 payload shapes, which belong to [SRIS-P1-API-006](./SRIS-P1-API-006_APIErrorCodeCatalog.md) — API Error Code Catalog.
+- The exact error codes and RFC 7807 payload shapes, which belong to [SRIS-P1-API-006](../wave-3-detailed-design/SRIS-P1-API-006_APIErrorCodeCatalog.md) — API Error Code Catalog.
 - The Grafana dashboard configuration, which belongs to [SRIS-P1-ARCH-012](./SRIS-P1-ARCH-012_ObservabilityAndMonitoringDesignOTelW3C.md) — Observability and Monitoring Design (OTel/W3C).
 
 ### 1.3 Audience
@@ -143,7 +143,7 @@ To survive the 5.1 GB constraint and guarantee graceful failure handling, the fo
   - **Open State Duration:** 30 seconds.
   - **Half-Open State:** 3 test calls.
   - **Trips On:** HTTP 5xx errors and connection timeouts. **Never trips on latency.**
-- **Reason:** Gemini's review revealed that Nginx and Resilience4j would fight each other if both handled HTTP 5xx. Nginx must only respond to TCP failures. Resilience4j must be the sole arbiter of semantic errors. `TIME_BASED` windows are mandatory because `COUNT_BASED` windows in low-traffic periods would fail to close the circuit promptly.
+- **Reason:** Nginx and Resilience4j would fight each other if both handled HTTP 5xx. Nginx must only respond to TCP failures. Resilience4j must be the sole arbiter of semantic errors. `TIME_BASED` windows are mandatory because `COUNT_BASED` windows in low-traffic periods would fail to close the circuit promptly.
 
 ### 2.2 Hybrid Bulkhead with Connection Bounds
 
@@ -154,7 +154,7 @@ To survive the 5.1 GB constraint and guarantee graceful failure handling, the fo
 - **Node.js (S1, S4, S5, S6):**
   - **Max Concurrent Calls:** 20 per dependency.
   - **Rejection Behaviour:** When the semaphore is saturated, the service MUST immediately close the TCP socket or return `503 Service Unavailable` **without allocating memory for the request body**.
-- **Reason:** Gemini revealed that a ThreadPool size of 10 with HikariCP size of 5 causes thread starvation and freezes the service. The (HikariCP - 2) rule guarantees that external calls can never exhaust the database connection pool. Node.js must reject immediately to prevent V8 heap OOM accumulation.
+- **Reason:** A ThreadPool size of 10 with HikariCP size of 5 causes thread starvation and freezes the service. The (HikariCP - 2) rule guarantees that external calls can never exhaust the database connection pool. Node.js must reject immediately to prevent V8 heap OOM accumulation.
 
 ### 2.3 Idempotency and Retry Policy
 
@@ -163,7 +163,7 @@ To survive the 5.1 GB constraint and guarantee graceful failure handling, the fo
   - Frontend generates UUID per request.
   - Backend checks Redis `SETNX` (fast-fail pre-filter) and PostgreSQL unique constraint (source of truth).
   - Duplicate requests return the original response.
-  - Duplicate payments (two transaction_ids) trigger automatic refund via the Saga (ARCH-015).
+  - Duplicate payments (two transaction_ids) trigger automatic refund via the Saga ([SRIS-P1-ARCH-015](./SRIS-P1-ARCH-015_DistributedTransactionAndSagaPatternDesign.md) — Distributed Transaction and Saga Pattern Design).
 - **Reason:** Blind retries would cause double-bookings and double-charges. Idempotency-Key + Database Unique Constraint guarantees exact-once processing.
 
 ### 2.4 Error-Rate-Based Circuit Breaking
@@ -173,7 +173,7 @@ To survive the 5.1 GB constraint and guarantee graceful failure handling, the fo
 - **Latency Tolerance:** Legitimate slow traffic during Tatkal-like surges does NOT trip the circuit.
 - **Fallback for Read Operations:** Return cached data from Redis.
 - **Fallback for Financial Writes:** Return `503 Service Unavailable`. **Never use stale fare.**
-- **Reason:** Gemini revealed that latency-based tripping causes false positives during peak load. Error-rate-based tripping is mathematically immune to natural CPU scheduling delays.
+- **Reason:** Latency-based tripping causes false positives during peak load. Error-rate-based tripping is mathematically immune to natural CPU scheduling delays.
 
 ### 2.5 Bounded DLQ with PostgreSQL Archival
 
@@ -186,13 +186,13 @@ To survive the 5.1 GB constraint and guarantee graceful failure handling, the fo
   - After successful INSERT, sends `XDEL` to remove from Redis.
   - Pushes `sris_dlq_archival_last_success_timestamp` to Prometheus Pushgateway.
 - **Alert Rule:** If `sris_dlq_archival_last_success_timestamp` is older than 25 hours, fire a critical Grafana alert.
-- **Reason:** Gemini revealed that infinite retries in a 128 MB Redis would cause OOM. The `ON CONFLICT DO NOTHING` clause prevents duplicate archival if the cron crashes between INSERT and XDEL.
+- **Reason:** Infinite retries in a 128 MB Redis would cause OOM. The `ON CONFLICT DO NOTHING` clause prevents duplicate archival if the cron crashes between INSERT and XDEL.
 
 ### 2.6 Financial Strictness on Fallbacks
 
 - **Rule:** Circuit Breaker fallbacks for **financial writes** (fare re-quotes, payment initiation) MUST return `503 Service Unavailable`. No stale cached data is ever used for financial transactions.
 - **Only read-only operations** (train search, PNR retrieval) may use Redis cache fallback.
-- **Reason:** Gemini revealed that serving a stale fare from Redis cache would cause ledger reconciliation failures. This is a compliance violation.
+- **Reason:** Serving a stale fare from Redis cache would cause ledger reconciliation failures. This is a compliance violation.
 
 ### 2.7 Socket Disconnection and Query Timeout
 
@@ -200,7 +200,7 @@ To survive the 5.1 GB constraint and guarantee graceful failure handling, the fo
 - **Spring Boot Configuration:**
   - Set `spring.transaction.default-timeout=2` at the JDBC level.
   - Monitor TCP socket state. If the client disconnects, interrupt the executing Java thread gracefully.
-- **Reason:** Gemini revealed that if a mobile user enters a tunnel, the socket silently dies without sending a TCP RST. Relying only on socket disconnection detection is insufficient. The JDBC query timeout guarantees ghost threads are killed even if the TCP socket hangs silently.
+- **Reason:** If a mobile user enters a tunnel, the socket silently dies without sending a TCP RST. Relying only on socket disconnection detection is insufficient. The JDBC query timeout guarantees ghost threads are killed even if the TCP socket hangs silently.
 
 ### 2.8 QoS Thread Pools and Kill Switch
 
@@ -218,7 +218,8 @@ To survive the 5.1 GB constraint and guarantee graceful failure handling, the fo
 - **Load Balancer Health Check:**
   - The Load Balancer MUST query `/health/liveness` (basic process health).
   - The Load Balancer MUST NOT query `/health` (which includes circuit breaker state). Otherwise, an open circuit would mark the pod as "dead" and the Load Balancer would kill the only container.
-- **Reason:** Gemini revealed that without QoS, critical refunds are delayed by low-priority notifications. Without a Kill Switch TTL, an admin could leave the system in an "open" state indefinitely. Without proper LB health checks, a graceful degradation would become a total outage.
+- **Reason:** Without QoS, critical refunds are delayed by low-priority notifications. Without a Kill Switch TTL, an admin could leave the system in an "open" state indefinitely. Without proper LB health checks, a graceful degradation would become a total outage.
+- **Provisional — Dashboard alarm (finalised in ARCH-012).** The Kill Switch state (`DISABLED` or `FORCED_OPEN`) and every transition between them must be visible on the central command dashboard as an alarm. The alarm must name the circuit, the transition direction, and the remaining TTL. Prometheus scrapes the state from `/actuator/circuitbreakers`; Grafana displays it and fires the alarm. The panel definition, threshold, and notification channel belong to [SRIS-P1-ARCH-012](./SRIS-P1-ARCH-012_ObservabilityAndMonitoringDesignOTelW3C.md) — Observability and Monitoring Design (OTel/W3C). This document records only that the state is alarm-worthy and must not be silently forced.
 
 ---
 
@@ -314,8 +315,10 @@ It proves the **Idempotency-Key** mechanism:
 
 1. The frontend sends a unique UUID with every request.
 2. The backend uses Redis SETNX as a fast pre-filter.
-3. The backend uses a PostgreSQL unique constraint as the absolute source of truth.
+3. The backend uses a PostgreSQL unique constraint as the absolute source of truth, on the `payment_inflight` table inside `sris_reservation`.
 4. Duplicate payments (two separate transaction IDs) are detected and automatically refunded.
+
+The `payment_inflight` table replaces the deleted `PaymentAttempt` aggregate (Conflict C-3 resolution, Option C). It lives inside S3's `sris_reservation` database alongside the Booking aggregate, which is what allows the payment state and the booking state to be written inside the same atomic transaction. See [SRIS-P1-ARCH-005](./SRIS-P1-ARCH-005_DomainModelDocument.md) — Domain Model Document §8.1 and [SRIS-P1-ARCH-015](./SRIS-P1-ARCH-015_DistributedTransactionAndSagaPatternDesign.md) — Distributed Transaction and Saga Pattern Design §3.
 
 ```mermaid
 %%{init: {
@@ -361,7 +364,7 @@ flowchart TD
 
     %% New Payment
     CreateWindow["Create payment_window<br/>in Redis DB0 (5-min TTL)"]:::action
-    InitiatePayment["Call S5 Mock Gateway<br/>(Initiate Payment)"]:::action
+    InitiatePayment["Call S5 Payment Gateway<br/>(Initiate Payment)"]:::action
     Return200["Return 200 OK<br/>(payment_window_id)"]:::success
 
     %% Callback
@@ -400,6 +403,8 @@ flowchart TD
 ## 5. The DLQ Archival and Kill Switch Flowchart
 
 The diagram below illustrates how the Kill Switch administrative override and the DLQ archival pipeline interact as one causal chain. The Kill Switch forces a circuit open; downstream calls then fail fast; those failed messages accumulate in a bounded DLQ; the archival cron drains them to PostgreSQL; and in parallel the TTL counts down until the circuit auto-reverts to standard error-rate evaluation.
+
+The Kill Switch state, including the remaining TTL, is also displayed on the central command dashboard as an alarm (see the provisional note under §2.8). The dashboard consumption belongs to [SRIS-P1-ARCH-012](./SRIS-P1-ARCH-012_ObservabilityAndMonitoringDesignOTelW3C.md) — Observability and Monitoring Design (OTel/W3C).
 
 It proves three properties:
 
@@ -486,7 +491,7 @@ flowchart TD
 
 | Role           | Name        | Decision | Date       |
 | -------------- | ----------- | -------- | ---------- |
-| Lead Architect | Koushal Jha | Approved | 2026-10-21 |
+| Lead Architect | Koushal Jha | Approved | 2026-10-22 |
 
 ---
 
@@ -495,6 +500,7 @@ flowchart TD
 | Version | Date       | Author      | Change           |
 | ------- | ---------- | ----------- | ---------------- |
 | 1.0     | 2026-10-21 | Koushal Jha | Initial release. |
+| 1.1     | 2026-10-22 | Koushal Jha | Added a provisional dashboard alarm note to Rule 2.8 (Kill Switch state and transitions must be visible on the central command dashboard; panel definition and alerting rules owned by ARCH-012). Added a paragraph to §4 naming `payment_inflight` (inside `sris_reservation`) as the table holding the idempotency key, replacing the deleted `PaymentAttempt` aggregate, with citations to ARCH-005 §8.1 and ARCH-015 §3. Renamed "S5 Mock Gateway" to "S5 Payment Gateway" in the §4 Idempotency Mermaid node. Added a paragraph to §5 stating that the Kill Switch state and remaining TTL are displayed on the dashboard, citing ARCH-012. Added ARCH-016 and INF-011 to Appendix B.1. Updated metadata and Approval Date. |
 
 ---
 
@@ -515,11 +521,14 @@ Not applicable.
 | 0.3  | [SRIS-P1-GOV-004](../wave-0-project-foundation/SRIS-P1-GOV-004_DocumentCrossReferenceStandard.md)               | Document Cross-Reference Standard                 | 0    | P1  | UNBLOCK |
 | 1.1  | [SRIS-P1-REQ-001](../wave-1-requirements/SRIS-P1-REQ-001_GlossaryAndDomainDictionary.md)                        | Glossary and Domain Dictionary                    | 1    | P0  | UNBLOCK |
 | 2.3  | [SRIS-P1-ARCH-003](./SRIS-P1-ARCH-003_SystemArchitectureDocument.md)                                            | System Architecture Document                      | 2    | P0  | UNBLOCK |
+| 2.5  | [SRIS-P1-ARCH-005](./SRIS-P1-ARCH-005_DomainModelDocument.md)                                                   | Domain Model Document                             | 2    | P0  | UNBLOCK |
 | 2.9  | [SRIS-P1-ARCH-009](./SRIS-P1-ARCH-009_ServiceInteractionAndCommunicationDesign.md)                              | Service Interaction and Communication Design      | 2    | P0  | UNBLOCK |
 | 2.12 | [SRIS-P1-ARCH-012](./SRIS-P1-ARCH-012_ObservabilityAndMonitoringDesignOTelW3C.md)                               | Observability and Monitoring Design (OTel/W3C)    | 2    | P0  | UNBLOCK |
 | 2.14 | [SRIS-P1-ARCH-014](./SRIS-P1-ARCH-014_DistributedConcurrencyAndLockingStrategy.md)                              | Distributed Concurrency and Locking Strategy      | 2    | P0  | UNBLOCK |
 | 2.15 | [SRIS-P1-ARCH-015](./SRIS-P1-ARCH-015_DistributedTransactionAndSagaPatternDesign.md)                            | Distributed Transaction and Saga Pattern Design   | 2    | P0  | UNBLOCK |
+| 2.16 | [SRIS-P1-ARCH-016](./SRIS-P1-ARCH-016_ServiceRegistryAndCatalog.md)                                             | Service Registry and Catalog                      | 2    | P0  | UNBLOCK |
 | 3.19 | [SRIS-P1-API-006](../wave-3-detailed-design/SRIS-P1-API-006_APIErrorCodeCatalog.md)                             | API Error Code Catalog                            | 3    | P1  | FOLLOW  |
+| 5.11 | [SRIS-P1-INF-011](../wave-5-devops-operations/SRIS-P1-INF-011_EnvironmentVariablesAndConfigurationReference.md)  | Environment Variables and Configuration Reference | 5    | P0  | UNBLOCK |
 
 ### B.2 Documents That Reference This Document
 
