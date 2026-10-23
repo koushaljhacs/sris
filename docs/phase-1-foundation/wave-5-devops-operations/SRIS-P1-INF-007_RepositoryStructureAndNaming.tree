@@ -1,0 +1,3936 @@
+================================================================================
+SRIS PROJECT — COMPLETE STRUCTURE, SUMMARY & VERIFICATION
+================================================================================
+
+Project root: C:\Projects\sris\
+Generated  : Full expanded tree (java/com/sarathi/sris/* packages UNROLLED)
+Total files: 2,707
+Total dirs : ~443 (expanded, package paths split into real folders)
+
+Reading order in this document:
+  SECTION 1 — TOP-LEVEL SUMMARY       (map of what each bucket is)
+  SECTION 2 — COMPLETE TREE DESIGN    (full expanded tree, paste-ready)
+  SECTION 3 — VERIFICATION TABLE      (reconciliation — check your numbers)
+
+================================================================================
+SECTION 1 — TOP-LEVEL SUMMARY
+================================================================================
+
+--------------------------------------------------------------------------------
+1.1 — What each top-level bucket contains
+--------------------------------------------------------------------------------
+
+  [root files]     Project metadata: README, LICENSE, CHANGELOG, CODEOWNERS,
+                   CONTRIBUTING, SECURITY, Makefile, docker-compose*.yml,
+                   .gitignore, .editorconfig, .envrc, .pre-commit, etc.
+
+  .github/         CI/CD pipelines, issue templates, PR template,
+                   Dependabot, labeler.
+                   40 workflows (ci-*, cd-*, nightly-*, ops-*, release-*).
+
+  docs/            ALL documentation in 9 waves under phase-1-foundation/.
+                   wave-0  governance (GOV-001..020, DEV-001, DEV-002)
+                   wave-1  requirements (REQ-001..017)
+                   wave-2  architecture (ARCH-001..017 + 13 diagrams)
+                   wave-3  detailed design
+                             data/    (DATA-001..013)
+                             api/     (API-001..016)
+                             ui/      (UI-001..013)
+                             security/(SEC-001..010, 012..014)
+                   wave-4  testing (TEST-001..014, SEC-011, TEST-016..018)
+                   wave-5  devops + operations (INF-001..036, OPS-001..012)
+                   wave-6  developer standards (DEV-003..012, 014..018)
+                   wave-7  project tracking (DEV-013, PM-001..016)
+                   wave-8  user support (USR-001..009)
+                   wave-9  supporting artifacts (NFR-HOLD-001, NOTES-AI-001..003)
+
+  clients/         Front-end applications.
+                   web/    customer-portal (Next.js, customer-facing)
+                           employee-portal (Next.js, staff-facing)
+                           shared          (shared TS package)
+                   mobile/ android-sms-gateway (Kotlin Android, SMS bridge)
+                           message-app        (Flutter, admin mobile UI)
+
+  contracts/       API + event contracts.
+                   openapi/  S1-IAM, S2-master-data, S3-reservation,
+                             S4-search-bff, S5-payment-gateway
+                   asyncapi/ S3-reservation-publishes, S6-notification-consumes
+                   examples/ booking-created/confirmed/waitlisted, payment-callback
+                   spectral/ lint rules
+                   pact/     consumer-driven contract pacts
+
+  database/        Per-service schema migrations, seeds, initdb, rollback,
+                   expected-schema snapshots, naming rules.
+                   iam/          V1..V9 + U1..U9  (18 files)
+                   master-data/  V1..V11 + U1..U11 (22 files)
+                   reservation/  V1..V15 + U1..U15 (30 files)
+                   notification/ V1..V6 + U1..U6   (12 files)
+
+  services/        Back-end microservices.
+                   java/   s2-master-data  (Spring Boot, JPA, Flyway)
+                           s3-reservation  (Spring Boot, Saga, Outbox)
+                   node/   s1-iam              (NestJS, Prisma)
+                           s4-search-bff       (NestJS, Redis read-model)
+                           s5-payment-gateway  (NestJS, provider-swap)
+                           s6-notification     (NestJS, Redis streams)
+                   python/ s6-py-daemon (FastAPI, psutil monitoring, anomaly)
+
+  infra/           Infrastructure-as-code.
+                   docker/       per-service Dockerfiles + monitoring images
+                   compose/      base + modules/* + environments/{dev,test,prod}
+                   nginx/        conf.d/{dev,test,prod} + snippets + certs
+                   prometheus/   rules + alerts/{dev,test,prod}
+                   grafana/      provisioning + dashboards/{dev,test,prod}
+                   loki/         config per env
+                   promtail/     config per env
+                   tempo/        config per env
+                   otel/         collector config
+                   alertmanager/ receivers + templates
+                   postgres/     postgresql-{dev,test,prod}.conf
+                   redis/        redis-{dev,test,prod}.conf
+                   k6/           load test image
+                   pact-broker/  contract broker
+                   stubs/        gmail-smtp-stub, android-sms-stub
+                   config/       schema, templates, providers, cloud,
+                                 maintenance, launcher, env-matrix
+                   maintenance-page/  static HTML when maintenance mode
+                   tailscale/    ACL
+                   secrets/      dev/test/prod (gitignored)
+                   cron/         system cron schedules
+                   systemd/      retention, backup, maintenance-scheduler
+                   backup/       backup data dir
+                   exporters/    postgres_exporter, redis_exporter, node_exporter
+
+  sris-launcher/   Desktop launcher (Java UI + Python engine).
+                   java-ui/       Swing UI, ~46 Java files in
+                                  com/sarathi/sris/launcher/{bridge,pages,components,styles}
+                   python-engine/ sris_launcher_engine package
+                                  (elevation, integrity, device, preflight,
+                                   autofix, auth, crypto, biometric,
+                                   recovery, audit, launcher, install,
+                                   registration, update, diagnostics)
+                   bridge/        JSON-RPC protocol + JSON schemas
+                                  (16 request/response + deadline.event)
+                   packaging/     build_bundle, sign_bundle, release, ...
+                   installer/     windows/macos/linux installers + bundle
+                   build-keys/    developer + update-signing public keys
+                   tools/         developer-recovery-cli, verify-manifest
+                   config/        launcher-config.toml, update_server.toml
+                   service/       systemd/launchd/Windows service defs
+                   docs/          12 launcher-specific docs
+                   assets/        icons, splash, source SVGs
+
+  scripts/         Automation scripts.
+                   bash/        setup, dev, test, ci, deployment,
+                                maintenance, ops, analysis
+                   powershell/  same structure mirrored for Windows
+                   git-hooks/   pre-commit-exec-bit
+
+  tests/           Cross-cutting integration tests (outside service dirs).
+                   integration/  15 tests (end-to-end booking, fault-iso,
+                                 recovery, env-isolation, boundary-guard,
+                                 naming-guard, tree-sync, config-validate)
+                   chaos/        fault-injection
+                   migration/    migration-dryrun
+                   e2e/          Playwright specs (customer, employee, a11y)
+                   accessibility/axe-runner
+                   contract/     Pact consumer-driven + pact-broker
+                   load/         k6 scripts + helpers + results
+                   security/     ZAP baseline + full-scan + reports
+
+--------------------------------------------------------------------------------
+1.2 — Bucket summary (files / folders / % of total files)
+--------------------------------------------------------------------------------
+
+  #   Bucket                          Files    Folders   % of files
+  --- ------------------------------- -------- --------- -----------
+   0  Root loose files                   23          1        0.8%
+   1  .github/                           53          3        2.0%
+   2  docs/                             236         13        8.7%
+   3  clients/                          662        ~156       24.5%
+   4  contracts/                         31          9        1.1%
+   5  database/                         109         13        4.0%
+   6  services/                         817        ~90       30.2%
+   7  infra/                            206        ~55        7.6%
+   8  sris-launcher/                    453        ~75       16.7%
+   9  scripts/                           74         18        2.7%
+  10  tests/                             43         10        1.6%
+      -------------------------------- -------- --------- -----------
+      TOTAL                            2,707       ~443      100.0%
+
+--------------------------------------------------------------------------------
+1.3 — "Where do I look first?" cheat sheet
+--------------------------------------------------------------------------------
+
+  What the project does ......... docs/phase-1-foundation/wave-0-project-foundation/
+  What services exist ........... services/  +  contracts/openapi/
+  How to build / run ............ .github/workflows/  +  infra/compose/
+  Where a feature is implemented  services/<lang>/<sN>/src/main/
+  Front-end screens ............. clients/web/customer-portal/app/
+                                  clients/web/employee-portal/app/
+  Launcher behaviour ............ sris-launcher/python-engine/src/sris_launcher_engine/
+  How deployment works .......... infra/compose/environments/  +  scripts/bash/deployment/
+  How testing is wired .......... tests/  +  services/*/src/test/
+
+================================================================================
+SECTION 2 — COMPLETE TREE DESIGN
+================================================================================
+
+NOTE — Package-path expansion rules applied in this tree:
+
+  Java/Kotlin:
+    java/com/sarathi/sris/<module>/   is 5 REAL folders, not 1 line.
+
+  Python:
+    sris_ops_engine/anomaly/models/   is 3 REAL folders.
+    sris_launcher_engine/preflight/system/disk_encryption/  is 4 REAL folders.
+
+  Flutter:
+    lib/core/config/                  is 3 REAL folders.
+
+  TypeScript:
+    src/data/prisma/                  is 3 REAL folders.
+
+--------------------------------------------------------------------------------
+2.1 — Root and shallow depth
+--------------------------------------------------------------------------------
+
+C:\Projects\sris\
+│
+├── README.md
+├── .gitignore
+├── .gitattributes
+├── .editorconfig
+├── .envrc
+├── .envrc.example
+├── .env.example
+├── .nvmrc
+├── .tool-versions
+├── .mailmap
+├── .pre-commit-config.yaml
+├── .yamllint.yaml
+├── CODEOWNERS
+├── LICENSE
+├── CONTRIBUTING.md
+├── SECURITY.md
+├── CHANGELOG.md
+├── Makefile
+├── docker-compose.yml
+├── docker-compose.dev.yml
+├── docker-compose.test.yml
+├── docker-compose.prod.yml
+├── .dockerignore
+│
+├── .github/
+│   ├── CODEOWNERS
+│   ├── ACTIONS.md
+│   ├── PULL_REQUEST_TEMPLATE.md
+│   ├── dependabot.yml
+│   ├── labeler.yml
+│   ├── ISSUE_TEMPLATE/
+│   │   ├── config.yml
+│   │   ├── bug_report.md
+│   │   ├── feature_request.md
+│   │   ├── architecture_change.md
+│   │   ├── security_disclosure.md
+│   │   ├── incident_report.md
+│   │   ├── environment_incident.md
+│   │   └── launcher_incident.md
+│   └── workflows/
+│       ├── ci-java.yml
+│       ├── ci-node.yml
+│       ├── ci-python.yml
+│       ├── ci-launcher-java.yml
+│       ├── ci-launcher-python.yml
+│       ├── ci-launcher-bridge.yml
+│       ├── ci-launcher-integration.yml
+│       ├── ci-launcher-host-ports.yml
+│       ├── ci-contracts.yml
+│       ├── ci-boundary-guard.yml
+│       ├── ci-tree-regenerate.yml
+│       ├── ci-naming-guard.yml
+│       ├── ci-env-separation-guard.yml
+│       ├── ci-security.yml
+│       ├── ci-license-check.yml
+│       ├── ci-db-migration-guard.yml
+│       ├── ci-no-hardcoded-hosts.yml
+│       ├── ci-readonly-container-check.yml
+│       ├── ci-deterministic-tests.yml
+│       ├── ci-config-validate.yml
+│       ├── ci-maintenance-guard.yml
+│       ├── ci-docs.yml
+│       ├── cd-images-dev.yml
+│       ├── cd-images-test.yml
+│       ├── cd-images-prod.yml
+│       ├── cd-compose-validate.yml
+│       ├── cd-sbom.yml
+│       ├── cd-image-scan.yml
+│       ├── cd-deploy-dev.yml
+│       ├── cd-deploy-test.yml
+│       ├── cd-deploy-prod.yml
+│       ├── cd-launcher-build.yml
+│       ├── cd-launcher-sign.yml
+│       ├── cd-launcher-bundle.yml
+│       ├── cd-provider-swap-test.yml
+│       ├── ops-set-prod-maintenance.yml
+│       ├── nightly-load-test.yml
+│       ├── nightly-backup-verify.yml
+│       ├── weekly-postmortem-reminder.yml
+│       └── release-pdf.yml
+│
+├── docs/
+│   ├── blueprint.html
+│   └── phase-1-foundation/
+│       │
+│       ├── wave-0-project-foundation/
+│       │   ├── SRIS-P1-GOV-001_DocumentationIndexAndNavigationMap.md
+│       │   ├── SRIS-P1-GOV-002_DocumentTemplateStandard.md
+│       │   ├── SRIS-P1-GOV-003_DocumentIDAndCategoryScheme.md
+│       │   ├── SRIS-P1-GOV-004_DocumentCrossReferenceStandard.md
+│       │   ├── SRIS-P1-GOV-005_ProjectVisionAndScopeDocument.md
+│       │   ├── SRIS-P1-GOV-006_ProjectCharter.md
+│       │   ├── SRIS-P1-GOV-007_ProjectManagementPlan.md
+│       │   ├── SRIS-P1-GOV-008_ProjectStakeholderAndAudienceRegister.md
+│       │   ├── SRIS-P1-GOV-009_RiskManagementPlan.md
+│       │   ├── SRIS-P1-GOV-010_CommunicationPlan.md
+│       │   ├── SRIS-P1-GOV-011_QualityManagementPlan.md
+│       │   ├── SRIS-P1-GOV-012_ChangeManagementPlan.md
+│       │   ├── SRIS-P1-GOV-013_AssumptionsAndConstraintsLog.md
+│       │   ├── SRIS-P1-GOV-014_DecisionLogMaster.md
+│       │   ├── SRIS-P1-GOV-015_BusinessCaseDocument.md
+│       │   ├── SRIS-P1-GOV-016_LicenseDocument.md
+│       │   ├── SRIS-P1-GOV-017_ContributionGuidelines.md
+│       │   ├── SRIS-P1-GOV-018_CodeOfConduct.md
+│       │   ├── SRIS-P1-GOV-019_ProductRoadmapPhase123.md
+│       │   ├── SRIS-P1-GOV-020_IncidentPostmortemTemplate.md
+│       │   ├── SRIS-P1-DEV-001_DeveloperProfile.md
+│       │   └── SRIS-P1-DEV-002_RolesAndResponsibilitiesDocument.md
+│       │
+│       ├── wave-1-requirements/
+│       │   ├── SRIS-P1-REQ-001_GlossaryAndDomainDictionary.md
+│       │   ├── SRIS-P1-REQ-002_BusinessRequirementsDocumentBRD.md
+│       │   ├── SRIS-P1-REQ-003_CapabilityCatalogFinal.md
+│       │   ├── SRIS-P1-REQ-004_SoftwareRequirementsSpecificationSRS.md
+│       │   ├── SRIS-P1-REQ-005_NonFunctionalRequirementsISO25010.md
+│       │   ├── SRIS-P1-REQ-006_UserStoriesAndUseCases.md
+│       │   ├── SRIS-P1-REQ-007_DomainRulesFareCalculation.md
+│       │   ├── SRIS-P1-REQ-008_DomainRulesTicketing.md
+│       │   ├── SRIS-P1-REQ-009_DomainRulesWaitlistAndCancellation.md
+│       │   ├── SRIS-P1-REQ-010_DomainRulesChartPreparation.md
+│       │   ├── SRIS-P1-REQ-011_DomainRulesSeatMatrixAndInventory.md
+│       │   ├── SRIS-P1-REQ-012_RequirementTraceabilityMatrixRTM.md
+│       │   ├── SRIS-P1-REQ-013_RequirementGatheringNotes.md
+│       │   ├── SRIS-P1-REQ-014_DataPrivacyRequirements.md
+│       │   ├── SRIS-P1-REQ-015_AccessibilityRequirements.md
+│       │   ├── SRIS-P1-REQ-016_BusinessModelDocument.md
+│       │   └── SRIS-P1-REQ-017_LauncherRequirements.md
+│       │
+│       ├── wave-2-architecture/
+│       │   ├── SRIS-P1-ARCH-001_MicroservicesIdentification.md
+│       │   ├── SRIS-P1-ARCH-002_ArchitecturePrinciples.md
+│       │   ├── SRIS-P1-ARCH-003_SystemArchitectureDocument.md
+│       │   ├── SRIS-P1-ARCH-004_BoundedContextMap.md
+│       │   ├── SRIS-P1-ARCH-005_DomainModelDocument.md
+│       │   ├── SRIS-P1-ARCH-006_EventStormingOutput.md
+│       │   ├── SRIS-P1-ARCH-007_ArchitectureDecisionRecordsMasterIndex.md
+│       │   ├── SRIS-P1-ARCH-008_TechnologyStackADR.md
+│       │   ├── SRIS-P1-ARCH-009_ServiceInteractionAndCommunicationDesign.md
+│       │   ├── SRIS-P1-ARCH-010_SecurityArchitectureDocument.md
+│       │   ├── SRIS-P1-ARCH-011_ErrorHandlingAndResilienceDesign.md
+│       │   ├── SRIS-P1-ARCH-012_ObservabilityAndMonitoringDesignOTelW3C.md
+│       │   ├── SRIS-P1-ARCH-013_DeploymentArchitectureDocument.md
+│       │   ├── SRIS-P1-ARCH-014_DistributedConcurrencyAndLockingStrategy.md
+│       │   ├── SRIS-P1-ARCH-015_DistributedTransactionAndSagaPatternDesign.md
+│       │   ├── SRIS-P1-ARCH-016_ServiceRegistryAndCatalog.md
+│       │   ├── SRIS-P1-ARCH-017_LauncherLanguageAndBridgeADR.md
+│       │   └── diagrams/
+│       │       ├── c4-context.mmd
+│       │       ├── c4-container.mmd
+│       │       ├── c4-component-s3.mmd
+│       │       ├── c4-component-launcher.mmd
+│       │       ├── sequence-auth.mmd
+│       │       ├── sequence-booking.mmd
+│       │       ├── sequence-saga-refund.mmd
+│       │       ├── sequence-launcher-preflight.mmd
+│       │       ├── sequence-launcher-anti-theft.mmd
+│       │       ├── sequence-launcher-recovery.mmd
+│       │       ├── deployment-launcher-on-server.mmd
+│       │       ├── startup-order.mmd
+│       │       └── memory-envelope.mmd
+│       │
+│       ├── wave-3-detailed-design/
+│       │   ├── data/
+│       │   │   ├── SRIS-P1-DATA-001_DataDesignDocument.md
+│       │   │   ├── SRIS-P1-DATA-002_LogicalDataModelPerService.md
+│       │   │   ├── SRIS-P1-DATA-003_PhysicalDatabaseSchemaDocument.md
+│       │   │   ├── SRIS-P1-DATA-004_DataDictionary.md
+│       │   │   ├── SRIS-P1-DATA-005_PrimaryKeyForeignKeyMap.md
+│       │   │   ├── SRIS-P1-DATA-006_IndexAndConstraintSpecification.md
+│       │   │   ├── SRIS-P1-DATA-007_DataOwnershipMatrix.md
+│       │   │   ├── SRIS-P1-DATA-008_HighConcurrencySegmentInventoryDataModel.md
+│       │   │   ├── SRIS-P1-DATA-009_SeatMatrixGenerationDesign.md
+│       │   │   ├── SRIS-P1-DATA-010_DataMigrationStrategy.md
+│       │   │   ├── SRIS-P1-DATA-011_DataRetentionAndArchivalPolicy.md
+│       │   │   ├── SRIS-P1-DATA-012_SeedDataAndReferenceDataSpecification.md
+│       │   │   └── SRIS-P1-DATA-013_DatabaseNamingConventions.md
+│       │   ├── api/
+│       │   │   ├── SRIS-P1-API-001_APIContractDocumentOpenAPI.md
+│       │   │   ├── SRIS-P1-API-002_APIRequestResponseExamples.md
+│       │   │   ├── SRIS-P1-API-003_EventSchemaDocumentAsyncAPI.md
+│       │   │   ├── SRIS-P1-API-004_IntegrationDesignDocument.md
+│       │   │   ├── SRIS-P1-API-005_IdempotencyAndRetryPolicySpecification.md
+│       │   │   ├── SRIS-P1-API-006_APIErrorCodeCatalog.md
+│       │   │   ├── SRIS-P1-API-007_APIAuthenticationAndHeaderRules.md
+│       │   │   ├── SRIS-P1-API-008_APIRateLimitingAndThrottlingRules.md
+│       │   │   ├── SRIS-P1-API-009_EventCatalog.md
+│       │   │   ├── SRIS-P1-API-010_APIGatewayConfigurationDocument.md
+│       │   │   ├── SRIS-P1-API-011_PaymentGatewayIntegrationDesignMock.md
+│       │   │   ├── SRIS-P1-API-012_NotificationIntegrationDesign.md
+│       │   │   ├── SRIS-P1-API-013_APIVersioningAndDeprecationPolicy.md
+│       │   │   ├── SRIS-P1-API-014_MaintenanceModeContract.md
+│       │   │   ├── SRIS-P1-API-015_LauncherBridgeContract.md
+│       │   │   └── SRIS-P1-API-016_LauncherLocalHttpAPI.md
+│       │   ├── ui/
+│       │   │   ├── SRIS-P1-UI-001_UIUXRequirementsDocument.md
+│       │   │   ├── SRIS-P1-UI-002_ScreenInventoryAndNavigationMap.md
+│       │   │   ├── SRIS-P1-UI-003_WireframesCustomerFlow.md
+│       │   │   ├── SRIS-P1-UI-004_WireframesEmployeeAdminFlow.md
+│       │   │   ├── SRIS-P1-UI-005_UIComponentLibrarySpecification.md
+│       │   │   ├── SRIS-P1-UI-006_FormFieldSpecification.md
+│       │   │   ├── SRIS-P1-UI-007_UIStateManagementDesign.md
+│       │   │   ├── SRIS-P1-UI-008_UIErrorAndNotificationDisplayRules.md
+│       │   │   ├── SRIS-P1-UI-009_UIAccessibilityGuidelines.md
+│       │   │   ├── SRIS-P1-UI-010_UIThemingAndBrandingGuide.md
+│       │   │   ├── SRIS-P1-UI-011_FrontendRoutingAndPageMap.md
+│       │   │   ├── SRIS-P1-UI-012_InternationalizationAndLocalizationDesign.md
+│       │   │   └── SRIS-P1-UI-013_LauncherWireframes.md
+│       │   └── security/
+│       │       ├── SRIS-P1-SEC-001_AuthenticationAndAuthorizationDesign.md
+│       │       ├── SRIS-P1-SEC-002_RBACMatrix.md
+│       │       ├── SRIS-P1-SEC-003_JWTTokenDesignAndClaims.md
+│       │       ├── SRIS-P1-SEC-004_ThreatModel.md
+│       │       ├── SRIS-P1-SEC-005_DataPrivacyAndComplianceDocument.md
+│       │       ├── SRIS-P1-SEC-006_DPDPActComplianceFrameworkPhase1Scoped.md
+│       │       ├── SRIS-P1-SEC-007_ConsentManagementDataModelPhase1Scoped.md
+│       │       ├── SRIS-P1-SEC-008_SecretsManagementPlan.md
+│       │       ├── SRIS-P1-SEC-009_PasswordAndCredentialPolicy.md
+│       │       ├── SRIS-P1-SEC-010_SecurityIncidentResponsePlan.md
+│       │       ├── SRIS-P1-SEC-012_DataClassificationRegister.md
+│       │       ├── SRIS-P1-SEC-013_SecureCodingStandards.md
+│       │       └── SRIS-P1-SEC-014_LauncherThreatModel.md
+│       │
+│       ├── wave-4-testing/
+│       │   ├── SRIS-P1-TEST-001_TestStrategyDocument.md
+│       │   ├── SRIS-P1-TEST-002_TestPlan.md
+│       │   ├── SRIS-P1-TEST-003_TestCasesFunctional.md
+│       │   ├── SRIS-P1-TEST-004_ConsumerDrivenContractTestingStrategy.md
+│       │   ├── SRIS-P1-TEST-005_TestCasesAPI.md
+│       │   ├── SRIS-P1-TEST-006_TestCasesDatabase.md
+│       │   ├── SRIS-P1-TEST-007_TestCasesUI.md
+│       │   ├── SRIS-P1-TEST-008_PerformanceTestPlan.md
+│       │   ├── SRIS-P1-TEST-009_LoadTestPlan.md
+│       │   ├── SRIS-P1-TEST-010_IntegrationTestPlan.md
+│       │   ├── SRIS-P1-TEST-011_UserAcceptanceTestUATPlan.md
+│       │   ├── SRIS-P1-TEST-012_TestDataManagementPlan.md
+│       │   ├── SRIS-P1-TEST-013_DefectManagementProcess.md
+│       │   ├── SRIS-P1-TEST-014_TestSummaryReportTemplate.md
+│       │   ├── SRIS-P1-SEC-011_SecurityTestingPlan.md
+│       │   ├── SRIS-P1-TEST-016_PerformanceBenchmarkReport.md
+│       │   ├── SRIS-P1-TEST-017_LauncherTestPlan.md
+│       │   └── SRIS-P1-TEST-018_LauncherAntiTheftTestScenarios.md
+│       │
+│       ├── wave-5-devops-operations/
+│       │   ├── SRIS-P1-INF-001_InfrastructureAndTechnologyDocument.md
+│       │   ├── SRIS-P1-INF-002_EnvironmentStrategyDocument.md
+│       │   ├── SRIS-P1-INF-003_CICDPipelineDesign.md
+│       │   ├── SRIS-P1-INF-004_PactBrokerAndCICDPipelineIntegration.md
+│       │   ├── SRIS-P1-INF-005_ConfigurationManagementPlan.md
+│       │   ├── SRIS-P1-INF-006_ContainerizationAndImageBuildGuide.md
+│       │   ├── SRIS-P1-INF-007_RepositoryStructureAndNaming.md
+│       │   ├── SRIS-P1-INF-007_RepositoryStructureAndNaming.tree
+│       │   ├── SRIS-P1-INF-008_BackupAndRestoreProcedure.md
+│       │   ├── SRIS-P1-INF-009_DisasterRecoveryPlan.md
+│       │   ├── SRIS-P1-INF-010_CapacityPlanningDocument.md
+│       │   ├── SRIS-P1-INF-011_EnvironmentVariablesAndConfigurationReference.md
+│       │   ├── SRIS-P1-INF-012_LauncherAndPreflightDesign.md
+│       │   ├── SRIS-P1-INF-013_LauncherSecurityModel.md
+│       │   ├── SRIS-P1-INF-014_HostPreflightAndAutofixDesign.md
+│       │   ├── SRIS-P1-INF-015_HighAuthorityDashboardDesign.md
+│       │   ├── SRIS-P1-INF-016_RootOfTrustAndRecoveryDesign.md
+│       │   ├── SRIS-P1-INF-017_ShamirAndKeyManagementDesign.md
+│       │   ├── SRIS-P1-INF-018_BiometricSubsystemDesign.md
+│       │   ├── SRIS-P1-INF-019_AuditChainAndComplianceEvidenceDesign.md
+│       │   ├── SRIS-P1-INF-020_AntiTheftThreeAttemptRule.md
+│       │   ├── SRIS-P1-INF-021_LauncherBridgeProtocol.md
+│       │   ├── SRIS-P1-INF-022_PenDriveBundleAndSelfUpdate.md
+│       │   ├── SRIS-P1-INF-023_ThreeAttemptAntiTheftMechanism.md
+│       │   ├── SRIS-P1-INF-024_LauncherHostPortsAndBindings.md
+│       │   ├── SRIS-P1-INF-025_LauncherDiagnosticsAndSupportBundle.md
+│       │   ├── SRIS-P1-INF-026_LauncherMaintenanceModeIntegration.md
+│       │   ├── SRIS-P1-INF-027_LauncherProcessModel.md
+│       │   ├── SRIS-P1-INF-028_LauncherStateFileSchemas.md
+│       │   ├── SRIS-P1-INF-029_BootCleanerLifecycle.md
+│       │   ├── SRIS-P1-INF-030_PreflightCheckDependencyGraph.md
+│       │   ├── SRIS-P1-INF-031_LauncherAlertmanagerIntegration.md
+│       │   ├── SRIS-P1-INF-032_MaintenanceModePropagation.md
+│       │   ├── SRIS-P1-INF-033_CrossEnvironmentNamingRule.md
+│       │   ├── SRIS-P1-INF-034_PenDriveBundleContents.md
+│       │   ├── SRIS-P1-INF-035_LauncherRuntimeFileLocations.md
+│       │   ├── SRIS-P1-INF-036_EnvironmentFileLoadOrder.md
+│       │   ├── SRIS-P1-OPS-001_DeploymentGuide.md
+│       │   ├── SRIS-P1-OPS-002_OperationsManualRunbook.md
+│       │   ├── SRIS-P1-OPS-003_MonitoringAndAlertingGuide.md
+│       │   ├── SRIS-P1-OPS-004_LoggingGuide.md
+│       │   ├── SRIS-P1-OPS-005_SLODocument.md
+│       │   ├── SRIS-P1-OPS-006_IncidentManagementProcedure.md
+│       │   ├── SRIS-P1-OPS-007_ReleaseManagementPlan.md
+│       │   ├── SRIS-P1-OPS-008_BackupAndRestoreRunbook.md
+│       │   ├── SRIS-P1-OPS-009_KnownIssuesAndLimitationsRegister.md
+│       │   ├── SRIS-P1-OPS-010_ReleaseNotesAndChangelog.md
+│       │   ├── SRIS-P1-OPS-011_LauncherReleaseAndPenDriveProcedure.md
+│       │   └── SRIS-P1-OPS-012_DeveloperRecoveryRunbook.md
+│       │
+│       ├── wave-6-developer-standards/
+│       │   ├── SRIS-P1-DEV-003_DevelopmentEnvironmentSetupGuide.md
+│       │   ├── SRIS-P1-DEV-004_CodingStandardsAndConventions.md
+│       │   ├── SRIS-P1-DEV-005_GitAndBranchingStrategy.md
+│       │   ├── SRIS-P1-DEV-006_DefinitionOfDoneDoD.md
+│       │   ├── SRIS-P1-DEV-007_DefinitionOfReadyDoR.md
+│       │   ├── SRIS-P1-DEV-008_CodeReviewChecklist.md
+│       │   ├── SRIS-P1-DEV-009_FrontendCodingStandards.md
+│       │   ├── SRIS-P1-DEV-010_BackendCodingStandards.md
+│       │   ├── SRIS-P1-DEV-011_DatabaseCodingStandards.md
+│       │   ├── SRIS-P1-DEV-012_NewContributorOnboardingGuide.md
+│       │   ├── SRIS-P1-DEV-014_CommentAndInlineDocumentationStandard.md
+│       │   ├── SRIS-P1-DEV-015_CommitMessageAndPullRequestConvention.md
+│       │   ├── SRIS-P1-DEV-016_DeveloperCommunicationProtocol.md
+│       │   ├── SRIS-P1-DEV-017_ToolchainVersionPolicy.md
+│       │   └── SRIS-P1-DEV-018_DependencyPinRegister.md
+│       │
+│       ├── wave-7-project-tracking/
+│       │   ├── SRIS-P1-DEV-013_SkillMatrix.md
+│       │   ├── SRIS-P1-PM-001_ProjectPlanTimeline.md
+│       │   ├── SRIS-P1-PM-002_MilestoneTracker.md
+│       │   ├── SRIS-P1-PM-003_SprintIterationPlan.md
+│       │   ├── SRIS-P1-PM-004_ProgressReportTemplate.md
+│       │   ├── SRIS-P1-PM-005_MeetingNotesAndDecisionLog.md
+│       │   ├── SRIS-P1-PM-006_IssueLog.md
+│       │   ├── SRIS-P1-PM-007_ChangeRequestLog.md
+│       │   ├── SRIS-P1-PM-008_RetrospectiveNotesSprint1.md
+│       │   ├── SRIS-P1-PM-009_RetrospectiveNotesSprint2.md
+│       │   ├── SRIS-P1-PM-010_RetrospectiveNotesSprint3.md
+│       │   ├── SRIS-P1-PM-011_RetrospectiveNotesSprint4.md
+│       │   ├── SRIS-P1-PM-012_RetrospectiveNotesSprint5.md
+│       │   ├── SRIS-P1-PM-013_RetrospectiveNotesSprint6.md
+│       │   ├── SRIS-P1-PM-014_SprintReviewNotesSprint1.md
+│       │   ├── SRIS-P1-PM-015_SprintReviewNotesSprint2.md
+│       │   └── SRIS-P1-PM-016_SprintReviewNotesSprint3.md
+│       │
+│       ├── wave-8-user-support/
+│       │   ├── SRIS-P1-USR-001_CustomerUserManual.md
+│       │   ├── SRIS-P1-USR-002_EmployeeAdminManual.md
+│       │   ├── SRIS-P1-USR-003_APIDocumentationForConsumers.md
+│       │   ├── SRIS-P1-USR-004_FAQDocument.md
+│       │   ├── SRIS-P1-USR-005_SupportAndMaintenanceGuide.md
+│       │   ├── SRIS-P1-USR-006_TrainingMaterial.md
+│       │   ├── SRIS-P1-USR-007_DemoScenariosAndWalkthroughScript.md
+│       │   ├── SRIS-P1-USR-008_InterviewAndPresentationPreparationGuide.md
+│       │   └── SRIS-P1-USR-009_LauncherAdminGuide.md
+│       │
+│       └── wave-9-supporting-artifacts/
+│           ├── SRIS-P1-NFR-HOLD-001_LoadModelAndResourceFitCheckHolding.md
+│           ├── SRIS-P1-NOTES-AI-001_AIConsultantLog.md
+│           ├── SRIS-P1-NOTES-AI-002_PromptLibrary.md
+│           └── SRIS-P1-NOTES-AI-003_SessionIndex.md
+│
+├── clients/
+│   │
+│   ├── README.md
+│   ├── CODEOWNERS
+│   │
+│   ├── web/
+│   │   ├── README.md
+│   │   ├── package.json
+│   │   ├── package-lock.json
+│   │   ├── turbo.json
+│   │   ├── .gitignore
+│   │   ├── .nvmrc
+│   │   │
+│   │   ├── customer-portal/
+│   │   │   ├── README.md
+│   │   │   ├── CODEOWNERS
+│   │   │   ├── package.json
+│   │   │   ├── package-lock.json
+│   │   │   ├── tsconfig.json
+│   │   │   ├── tsconfig.build.json
+│   │   │   ├── next.config.mjs
+│   │   │   ├── tailwind.config.ts
+│   │   │   ├── postcss.config.mjs
+│   │   │   ├── .eslintrc.cjs
+│   │   │   ├── .prettierrc
+│   │   │   ├── .env.dev.example
+│   │   │   ├── .env.test.example
+│   │   │   ├── .env.prod.example
+│   │   │   ├── .dockerignore
+│   │   │   ├── Dockerfile
+│   │   │   ├── next-env.d.ts
+│   │   │   │
+│   │   │   ├── public/
+│   │   │   │   ├── favicon.ico
+│   │   │   │   ├── logo.svg
+│   │   │   │   ├── manifest.webmanifest
+│   │   │   │   ├── robots.txt
+│   │   │   │   └── locales/
+│   │   │   │       ├── en.json
+│   │   │   │       └── hi.json
+│   │   │   │
+│   │   │   ├── app/
+│   │   │   │   ├── layout.tsx
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── globals.css
+│   │   │   │   ├── not-found.tsx
+│   │   │   │   ├── error.tsx
+│   │   │   │   ├── loading.tsx
+│   │   │   │   ├── sitemap.ts
+│   │   │   │   ├── icon.png
+│   │   │   │   ├── apple-icon.png
+│   │   │   │   ├── opengraph-image.tsx
+│   │   │   │   ├── twitter-image.tsx
+│   │   │   │   │
+│   │   │   │   ├── (auth)/
+│   │   │   │   │   ├── layout.tsx
+│   │   │   │   │   ├── login/
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   ├── register/
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   ├── verify-otp/
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   ├── forgot-password/
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   └── reset-password/
+│   │   │   │   │       └── page.tsx
+│   │   │   │   │
+│   │   │   │   ├── (customer)/
+│   │   │   │   │   ├── layout.tsx
+│   │   │   │   │   ├── loading.tsx
+│   │   │   │   │   ├── dashboard/
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   ├── search/
+│   │   │   │   │   │   ├── page.tsx
+│   │   │   │   │   │   ├── loading.tsx
+│   │   │   │   │   │   ├── error.tsx
+│   │   │   │   │   │   └── results/
+│   │   │   │   │   │       └── page.tsx
+│   │   │   │   │   ├── booking/
+│   │   │   │   │   │   ├── [trainId]/
+│   │   │   │   │   │   │   ├── page.tsx
+│   │   │   │   │   │   │   ├── seats/
+│   │   │   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   │   │   └── payment/
+│   │   │   │   │   │   │       └── page.tsx
+│   │   │   │   │   │   └── confirmation/
+│   │   │   │   │   │       └── [pnr]/
+│   │   │   │   │   │           └── page.tsx
+│   │   │   │   │   ├── pnr/
+│   │   │   │   │   │   ├── page.tsx
+│   │   │   │   │   │   └── [pnr]/
+│   │   │   │   │   │       └── page.tsx
+│   │   │   │   │   ├── bookings/
+│   │   │   │   │   │   ├── page.tsx
+│   │   │   │   │   │   └── loading.tsx
+│   │   │   │   │   ├── profile/
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   └── consent/
+│   │   │   │   │       └── page.tsx
+│   │   │   │   │
+│   │   │   │   └── (maintenance)/
+│   │   │   │       └── page.tsx
+│   │   │   │
+│   │   │   ├── components/
+│   │   │   │   ├── ui/
+│   │   │   │   │   ├── button.tsx
+│   │   │   │   │   ├── input.tsx
+│   │   │   │   │   ├── select.tsx
+│   │   │   │   │   ├── checkbox.tsx
+│   │   │   │   │   ├── radio-group.tsx
+│   │   │   │   │   ├── form-field.tsx
+│   │   │   │   │   ├── card.tsx
+│   │   │   │   │   ├── modal.tsx
+│   │   │   │   │   ├── drawer.tsx
+│   │   │   │   │   ├── toast.tsx
+│   │   │   │   │   ├── tooltip.tsx
+│   │   │   │   │   ├── badge.tsx
+│   │   │   │   │   ├── spinner.tsx
+│   │   │   │   │   ├── skeleton.tsx
+│   │   │   │   │   ├── tabs.tsx
+│   │   │   │   │   ├── pagination.tsx
+│   │   │   │   │   ├── table.tsx
+│   │   │   │   │   ├── empty-state.tsx
+│   │   │   │   │   ├── error-state.tsx
+│   │   │   │   │   ├── icons/
+│   │   │   │   │   │   └── index.tsx
+│   │   │   │   │   └── index.ts
+│   │   │   │   │
+│   │   │   │   ├── shared/
+│   │   │   │   │   ├── header.tsx
+│   │   │   │   │   ├── footer.tsx
+│   │   │   │   │   ├── nav-link.tsx
+│   │   │   │   │   ├── user-menu.tsx
+│   │   │   │   │   ├── locale-switcher.tsx
+│   │   │   │   │   ├── theme-toggle.tsx
+│   │   │   │   │   ├── protected-route.tsx
+│   │   │   │   │   ├── error-boundary.tsx
+│   │   │   │   │   └── index.ts
+│   │   │   │   │
+│   │   │   │   ├── search/
+│   │   │   │   │   ├── search-form.tsx
+│   │   │   │   │   ├── station-autocomplete.tsx
+│   │   │   │   │   ├── date-picker.tsx
+│   │   │   │   │   ├── class-selector.tsx
+│   │   │   │   │   ├── quota-selector.tsx
+│   │   │   │   │   ├── search-result-card.tsx
+│   │   │   │   │   ├── search-result-list.tsx
+│   │   │   │   │   ├── filter-panel.tsx
+│   │   │   │   │   └── index.ts
+│   │   │   │   │
+│   │   │   │   ├── booking/
+│   │   │   │   │   ├── train-summary-card.tsx
+│   │   │   │   │   ├── passenger-form.tsx
+│   │   │   │   │   ├── passenger-list.tsx
+│   │   │   │   │   ├── seat-selection.tsx
+│   │   │   │   │   ├── seat-legend.tsx
+│   │   │   │   │   ├── fare-breakdown.tsx
+│   │   │   │   │   ├── hold-timer.tsx
+│   │   │   │   │   ├── payment-form.tsx
+│   │   │   │   │   ├── payment-status.tsx
+│   │   │   │   │   ├── pnr-display.tsx
+│   │   │   │   │   ├── booking-stepper.tsx
+│   │   │   │   │   ├── book-another-button.tsx
+│   │   │   │   │   └── index.ts
+│   │   │   │   │
+│   │   │   │   ├── pnr/
+│   │   │   │   │   ├── pnr-search-form.tsx
+│   │   │   │   │   ├── pnr-status-badge.tsx
+│   │   │   │   │   ├── pnr-timeline.tsx
+│   │   │   │   │   └── index.ts
+│   │   │   │   │
+│   │   │   │   └── consent/
+│   │   │   │       ├── consent-banner.tsx
+│   │   │   │       ├── consent-form.tsx
+│   │   │   │       └── index.ts
+│   │   │   │
+│   │   │   ├── hooks/
+│   │   │   │   ├── use-auth.ts
+│   │   │   │   ├── use-current-user.ts
+│   │   │   │   ├── use-search.ts
+│   │   │   │   ├── use-availability.ts
+│   │   │   │   ├── use-seat-hold.ts
+│   │   │   │   ├── use-booking.ts
+│   │   │   │   ├── use-payment.ts
+│   │   │   │   ├── use-pnr-status.ts
+│   │   │   │   ├── use-my-bookings.ts
+│   │   │   │   ├── use-consent.ts
+│   │   │   │   ├── use-maintenance-status.ts
+│   │   │   │   ├── use-session-timeout.ts
+│   │   │   │   ├── use-toast.ts
+│   │   │   │   ├── use-media-query.ts
+│   │   │   │   ├── use-debounce.ts
+│   │   │   │   └── index.ts
+│   │   │   │
+│   │   │   ├── services/
+│   │   │   │   ├── api-client.ts
+│   │   │   │   ├── auth.service.ts
+│   │   │   │   ├── search.service.ts
+│   │   │   │   ├── booking.service.ts
+│   │   │   │   ├── payment.service.ts
+│   │   │   │   ├── pnr.service.ts
+│   │   │   │   ├── consent.service.ts
+│   │   │   │   ├── maintenance.service.ts
+│   │   │   │   └── index.ts
+│   │   │   │
+│   │   │   ├── store/
+│   │   │   │   ├── auth.store.ts
+│   │   │   │   ├── booking.store.ts
+│   │   │   │   ├── search.store.ts
+│   │   │   │   ├── ui.store.ts
+│   │   │   │   └── index.ts
+│   │   │   │
+│   │   │   ├── lib/
+│   │   │   │   ├── formatters.ts
+│   │   │   │   ├── validators.ts
+│   │   │   │   ├── constants.ts
+│   │   │   │   ├── error-messages.ts
+│   │   │   │   ├── maintenance.ts
+│   │   │   │   ├── maintenance-gate.ts
+│   │   │   │   ├── session-timeout.ts
+│   │   │   │   ├── env.ts
+│   │   │   │   └── index.ts
+│   │   │   │
+│   │   │   ├── providers/
+│   │   │   │   ├── query-provider.tsx
+│   │   │   │   ├── auth-provider.tsx
+│   │   │   │   ├── theme-provider.tsx
+│   │   │   │   ├── toast-provider.tsx
+│   │   │   │   └── index.tsx
+│   │   │   │
+│   │   │   ├── types/
+│   │   │   │   ├── auth.types.ts
+│   │   │   │   ├── search.types.ts
+│   │   │   │   ├── booking.types.ts
+│   │   │   │   ├── payment.types.ts
+│   │   │   │   ├── pnr.types.ts
+│   │   │   │   ├── api.types.ts
+│   │   │   │   ├── maintenance.types.ts
+│   │   │   │   └── index.ts
+│   │   │   │
+│   │   │   ├── middleware.ts
+│   │   │   │
+│   │   │   └── tests/
+│   │   │       ├── unit/
+│   │   │       │   ├── hooks/
+│   │   │       │   │   ├── use-search.test.ts
+│   │   │       │   │   └── use-booking.test.ts
+│   │   │       │   └── lib/
+│   │   │       │       ├── formatters.test.ts
+│   │   │       │       └── validators.test.ts
+│   │   │       ├── integration/
+│   │   │       │   ├── login-flow.test.tsx
+│   │   │       │   ├── search-flow.test.tsx
+│   │   │       │   ├── booking-flow.test.tsx
+│   │   │       │   └── payment-flow.test.tsx
+│   │   │       └── e2e/
+│   │   │           ├── playwright.config.ts
+│   │   │           └── specs/
+│   │   │               ├── customer-search-booking.spec.ts
+│   │   │               ├── customer-pnr.spec.ts
+│   │   │               └── customer-consent.spec.ts
+│   │   │
+│   │   ├── employee-portal/
+│   │   │   ├── README.md
+│   │   │   ├── CODEOWNERS
+│   │   │   ├── package.json
+│   │   │   ├── package-lock.json
+│   │   │   ├── tsconfig.json
+│   │   │   ├── tsconfig.build.json
+│   │   │   ├── next.config.mjs
+│   │   │   ├── tailwind.config.ts
+│   │   │   ├── postcss.config.mjs
+│   │   │   ├── .eslintrc.cjs
+│   │   │   ├── .prettierrc
+│   │   │   ├── .env.dev.example
+│   │   │   ├── .env.test.example
+│   │   │   ├── .env.prod.example
+│   │   │   ├── .dockerignore
+│   │   │   ├── Dockerfile
+│   │   │   ├── next-env.d.ts
+│   │   │   │
+│   │   │   ├── public/
+│   │   │   │   ├── favicon.ico
+│   │   │   │   ├── logo.svg
+│   │   │   │   ├── manifest.webmanifest
+│   │   │   │   ├── robots.txt
+│   │   │   │   └── locales/
+│   │   │   │       ├── en.json
+│   │   │   │       └── hi.json
+│   │   │   │
+│   │   │   ├── app/
+│   │   │   │   ├── layout.tsx
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── globals.css
+│   │   │   │   ├── not-found.tsx
+│   │   │   │   ├── error.tsx
+│   │   │   │   ├── loading.tsx
+│   │   │   │   ├── sitemap.ts
+│   │   │   │   ├── icon.png
+│   │   │   │   ├── apple-icon.png
+│   │   │   │   ├── opengraph-image.tsx
+│   │   │   │   ├── twitter-image.tsx
+│   │   │   │   │
+│   │   │   │   ├── (auth)/
+│   │   │   │   │   ├── layout.tsx
+│   │   │   │   │   └── login/
+│   │   │   │   │       └── page.tsx
+│   │   │   │   │
+│   │   │   │   ├── (employee)/
+│   │   │   │   │   ├── layout.tsx
+│   │   │   │   │   ├── loading.tsx
+│   │   │   │   │   ├── dashboard/
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   ├── master-data/
+│   │   │   │   │   │   ├── layout.tsx
+│   │   │   │   │   │   ├── loading.tsx
+│   │   │   │   │   │   ├── error.tsx
+│   │   │   │   │   │   ├── stations/
+│   │   │   │   │   │   │   ├── page.tsx
+│   │   │   │   │   │   │   ├── new/
+│   │   │   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   │   │   └── [id]/
+│   │   │   │   │   │   │       ├── page.tsx
+│   │   │   │   │   │   │       └── edit/
+│   │   │   │   │   │   │           └── page.tsx
+│   │   │   │   │   │   ├── routes/
+│   │   │   │   │   │   │   ├── page.tsx
+│   │   │   │   │   │   │   ├── new/
+│   │   │   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   │   │   └── [id]/
+│   │   │   │   │   │   │       ├── page.tsx
+│   │   │   │   │   │   │       └── edit/
+│   │   │   │   │   │   │           └── page.tsx
+│   │   │   │   │   │   ├── trains/
+│   │   │   │   │   │   │   ├── page.tsx
+│   │   │   │   │   │   │   ├── new/
+│   │   │   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   │   │   └── [id]/
+│   │   │   │   │   │   │       ├── page.tsx
+│   │   │   │   │   │   │       └── edit/
+│   │   │   │   │   │   │           └── page.tsx
+│   │   │   │   │   │   ├── schedules/
+│   │   │   │   │   │   │   ├── page.tsx
+│   │   │   │   │   │   │   ├── new/
+│   │   │   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   │   │   └── [id]/
+│   │   │   │   │   │   │       └── page.tsx
+│   │   │   │   │   │   ├── coaches/
+│   │   │   │   │   │   │   ├── page.tsx
+│   │   │   │   │   │   │   ├── new/
+│   │   │   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   │   │   └── [id]/
+│   │   │   │   │   │   │       └── page.tsx
+│   │   │   │   │   │   └── fares/
+│   │   │   │   │   │       ├── page.tsx
+│   │   │   │   │   │       ├── new/
+│   │   │   │   │   │       │   └── page.tsx
+│   │   │   │   │   │       └── [id]/
+│   │   │   │   │   │           └── page.tsx
+│   │   │   │   │   ├── operations/
+│   │   │   │   │   │   ├── layout.tsx
+│   │   │   │   │   │   ├── loading.tsx
+│   │   │   │   │   │   ├── chart-preparation/
+│   │   │   │   │   │   │   ├── page.tsx
+│   │   │   │   │   │   │   └── [trainId]/
+│   │   │   │   │   │   │       └── page.tsx
+│   │   │   │   │   │   ├── bookings/
+│   │   │   │   │   │   │   ├── page.tsx
+│   │   │   │   │   │   │   └── [id]/
+│   │   │   │   │   │   │       └── page.tsx
+│   │   │   │   │   │   └── cancellations/
+│   │   │   │   │   │       └── page.tsx
+│   │   │   │   │   ├── monitoring/
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   └── profile/
+│   │   │   │   │       └── page.tsx
+│   │   │   │   │
+│   │   │   │   └── (maintenance)/
+│   │   │   │       └── page.tsx
+│   │   │   │
+│   │   │   ├── components/
+│   │   │   │   ├── ui/
+│   │   │   │   │   ├── button.tsx
+│   │   │   │   │   ├── input.tsx
+│   │   │   │   │   ├── select.tsx
+│   │   │   │   │   ├── checkbox.tsx
+│   │   │   │   │   ├── radio-group.tsx
+│   │   │   │   │   ├── form-field.tsx
+│   │   │   │   │   ├── card.tsx
+│   │   │   │   │   ├── modal.tsx
+│   │   │   │   │   ├── drawer.tsx
+│   │   │   │   │   ├── toast.tsx
+│   │   │   │   │   ├── tooltip.tsx
+│   │   │   │   │   ├── badge.tsx
+│   │   │   │   │   ├── spinner.tsx
+│   │   │   │   │   ├── skeleton.tsx
+│   │   │   │   │   ├── tabs.tsx
+│   │   │   │   │   ├── pagination.tsx
+│   │   │   │   │   ├── data-table.tsx
+│   │   │   │   │   ├── empty-state.tsx
+│   │   │   │   │   ├── error-state.tsx
+│   │   │   │   │   ├── icons/
+│   │   │   │   │   │   └── index.tsx
+│   │   │   │   │   └── index.ts
+│   │   │   │   │
+│   │   │   │   ├── shared/
+│   │   │   │   │   ├── header.tsx
+│   │   │   │   │   ├── sidebar.tsx
+│   │   │   │   │   ├── nav-link.tsx
+│   │   │   │   │   ├── user-menu.tsx
+│   │   │   │   │   ├── locale-switcher.tsx
+│   │   │   │   │   ├── theme-toggle.tsx
+│   │   │   │   │   ├── role-guard.tsx
+│   │   │   │   │   ├── protected-route.tsx
+│   │   │   │   │   ├── error-boundary.tsx
+│   │   │   │   │   └── index.ts
+│   │   │   │   │
+│   │   │   │   ├── master-data/
+│   │   │   │   │   ├── station-form.tsx
+│   │   │   │   │   ├── route-form.tsx
+│   │   │   │   │   ├── route-stop-editor.tsx
+│   │   │   │   │   ├── train-form.tsx
+│   │   │   │   │   ├── schedule-form.tsx
+│   │   │   │   │   ├── coach-composition-form.tsx
+│   │   │   │   │   ├── berth-layout-editor.tsx
+│   │   │   │   │   ├── fare-rule-form.tsx
+│   │   │   │   │   ├── fare-quote-preview.tsx
+│   │   │   │   │   └── index.ts
+│   │   │   │   │
+│   │   │   │   ├── operations/
+│   │   │   │   │   ├── booking-search-form.tsx
+│   │   │   │   │   ├── booking-detail-card.tsx
+│   │   │   │   │   ├── chart-preparation-list.tsx
+│   │   │   │   │   ├── chart-preparation-detail.tsx
+│   │   │   │   │   ├── cancellation-form.tsx
+│   │   │   │   │   └── index.ts
+│   │   │   │   │
+│   │   │   │   ├── monitoring/
+│   │   │   │   │   ├── grafana-iframe.tsx
+│   │   │   │   │   └── index.ts
+│   │   │   │   │
+│   │   │   │   └── dashboard/
+│   │   │   │       ├── stats-card.tsx
+│   │   │   │       ├── recent-bookings-list.tsx
+│   │   │   │       ├── pending-chart-list.tsx
+│   │   │   │       └── index.ts
+│   │   │   │
+│   │   │   ├── hooks/
+│   │   │   │   ├── use-auth.ts
+│   │   │   │   ├── use-current-user.ts
+│   │   │   │   ├── use-role.ts
+│   │   │   │   ├── use-master-data.ts
+│   │   │   │   ├── use-stations.ts
+│   │   │   │   ├── use-routes.ts
+│   │   │   │   ├── use-trains.ts
+│   │   │   │   ├── use-schedules.ts
+│   │   │   │   ├── use-coaches.ts
+│   │   │   │   ├── use-fares.ts
+│   │   │   │   ├── use-chart-preparation.ts
+│   │   │   │   ├── use-bookings-search.ts
+│   │   │   │   ├── use-cancellations.ts
+│   │   │   │   ├── use-grafana-config.ts
+│   │   │   │   ├── use-maintenance-status.ts
+│   │   │   │   ├── use-session-timeout.ts
+│   │   │   │   ├── use-toast.ts
+│   │   │   │   ├── use-media-query.ts
+│   │   │   │   ├── use-debounce.ts
+│   │   │   │   └── index.ts
+│   │   │   │
+│   │   │   ├── services/
+│   │   │   │   ├── api-client.ts
+│   │   │   │   ├── auth.service.ts
+│   │   │   │   ├── master-data.service.ts
+│   │   │   │   ├── operation.service.ts
+│   │   │   │   ├── chart-preparation.service.ts
+│   │   │   │   ├── maintenance.service.ts
+│   │   │   │   └── index.ts
+│   │   │   │
+│   │   │   ├── store/
+│   │   │   │   ├── auth.store.ts
+│   │   │   │   ├── master-data.store.ts
+│   │   │   │   ├── ui.store.ts
+│   │   │   │   └── index.ts
+│   │   │   │
+│   │   │   ├── lib/
+│   │   │   │   ├── formatters.ts
+│   │   │   │   ├── validators.ts
+│   │   │   │   ├── constants.ts
+│   │   │   │   ├── error-messages.ts
+│   │   │   │   ├── roles.ts
+│   │   │   │   ├── role-routes.ts
+│   │   │   │   ├── session-timeout.ts
+│   │   │   │   ├── env.ts
+│   │   │   │   └── index.ts
+│   │   │   │
+│   │   │   ├── providers/
+│   │   │   │   ├── query-provider.tsx
+│   │   │   │   ├── auth-provider.tsx
+│   │   │   │   ├── theme-provider.tsx
+│   │   │   │   ├── toast-provider.tsx
+│   │   │   │   └── index.tsx
+│   │   │   │
+│   │   │   ├── types/
+│   │   │   │   ├── auth.types.ts
+│   │   │   │   ├── master-data.types.ts
+│   │   │   │   ├── operations.types.ts
+│   │   │   │   ├── api.types.ts
+│   │   │   │   ├── maintenance.types.ts
+│   │   │   │   └── index.ts
+│   │   │   │
+│   │   │   ├── middleware.ts
+│   │   │   │
+│   │   │   └── tests/
+│   │   │       ├── unit/
+│   │   │       │   ├── hooks/
+│   │   │       │   │   ├── use-master-data.test.ts
+│   │   │       │   │   └── use-chart-preparation.test.ts
+│   │   │       │   └── lib/
+│   │   │       │       ├── roles.test.ts
+│   │   │       │       └── validators.test.ts
+│   │   │       ├── integration/
+│   │   │       │   ├── login-flow.test.tsx
+│   │   │       │   ├── master-data-flow.test.tsx
+│   │   │       │   └── chart-preparation.test.tsx
+│   │   │       └── e2e/
+│   │   │           ├── playwright.config.ts
+│   │   │           └── specs/
+│   │   │               ├── employee-master-data.spec.ts
+│   │   │               ├── employee-chart-preparation.spec.ts
+│   │   │               └── employee-rbac.spec.ts
+│   │   │
+│   │   └── shared/
+│   │       ├── README.md
+│   │       ├── CODEOWNERS
+│   │       ├── CHANGELOG.md
+│   │       ├── package.json
+│   │       ├── package-lock.json
+│   │       ├── tsconfig.json
+│   │       ├── tsconfig.build.json
+│   │       ├── eslint.config.js
+│   │       ├── .prettierrc
+│   │       ├── .gitignore
+│   │       │
+│   │       ├── src/
+│   │       │   ├── index.ts
+│   │       │   │
+│   │       │   ├── api-client/
+│   │       │   │   ├── README.md
+│   │       │   │   ├── generated.ts
+│   │       │   │   ├── client.ts
+│   │       │   │   ├── interceptors.ts
+│   │       │   │   └── index.ts
+│   │       │   │
+│   │       │   ├── ui/
+│   │       │   │   ├── button.tsx
+│   │       │   │   ├── input.tsx
+│   │       │   │   ├── select.tsx
+│   │       │   │   ├── checkbox.tsx
+│   │       │   │   ├── radio-group.tsx
+│   │       │   │   ├── form-field.tsx
+│   │       │   │   ├── card.tsx
+│   │       │   │   ├── modal.tsx
+│   │       │   │   ├── drawer.tsx
+│   │       │   │   ├── toast.tsx
+│   │       │   │   ├── tooltip.tsx
+│   │       │   │   ├── badge.tsx
+│   │       │   │   ├── spinner.tsx
+│   │       │   │   ├── skeleton.tsx
+│   │       │   │   ├── tabs.tsx
+│   │       │   │   ├── pagination.tsx
+│   │       │   │   ├── data-table.tsx
+│   │       │   │   ├── empty-state.tsx
+│   │       │   │   ├── error-state.tsx
+│   │       │   │   ├── icons/
+│   │       │   │   │   └── index.tsx
+│   │       │   │   └── index.ts
+│   │       │   │
+│   │       │   ├── hooks/
+│   │       │   │   ├── use-debounce.ts
+│   │       │   │   ├── use-media-query.ts
+│   │       │   │   ├── use-toast.ts
+│   │       │   │   ├── use-auth-token.ts
+│   │       │   │   ├── use-current-user.ts
+│   │       │   │   ├── use-role.ts
+│   │       │   │   ├── use-session-timeout.ts
+│   │       │   │   ├── use-maintenance-status.ts
+│   │       │   │   └── index.ts
+│   │       │   │
+│   │       │   ├── lib/
+│   │       │   │   ├── formatters.ts
+│   │       │   │   ├── validators.ts
+│   │       │   │   ├── error-messages.ts
+│   │       │   │   ├── env.ts
+│   │       │   │   ├── dates.ts
+│   │       │   │   ├── money.ts
+│   │       │   │   ├── maintenance.ts
+│   │       │   │   ├── roles.ts
+│   │       │   │   ├── permissions.ts
+│   │       │   │   ├── session-timeout.ts
+│   │       │   │   └── index.ts
+│   │       │   │
+│   │       │   ├── types/
+│   │       │   │   ├── auth.types.ts
+│   │       │   │   ├── search.types.ts
+│   │       │   │   ├── booking.types.ts
+│   │       │   │   ├── master-data.types.ts
+│   │       │   │   ├── api.types.ts
+│   │       │   │   ├── maintenance.types.ts
+│   │       │   │   └── index.ts
+│   │       │   │
+│   │       │   ├── providers/
+│   │       │   │   ├── query-provider.tsx
+│   │       │   │   ├── theme-provider.tsx
+│   │       │   │   ├── toast-provider.tsx
+│   │       │   │   └── index.tsx
+│   │       │   │
+│   │       │   ├── styles/
+│   │       │   │   ├── tailwind-preset.ts
+│   │       │   │   ├── tokens.ts
+│   │       │   │   ├── tokens.css
+│   │       │   │   └── index.css
+│   │       │   │
+│   │       │   └── test-utils/
+│   │       │       ├── render.tsx
+│   │       │       ├── mocks.ts
+│   │       │       └── index.ts
+│   │       │
+│   │       └── tests/
+│   │           ├── unit/
+│   │           │   ├── ui/
+│   │           │   │   ├── button.test.tsx
+│   │           │   │   └── data-table.test.tsx
+│   │           │   ├── hooks/
+│   │           │   │   └── use-debounce.test.ts
+│   │           │   └── lib/
+│   │           │       └── formatters.test.ts
+│   │           └── fixtures/
+│   │               ├── user.fixture.ts
+│   │               └── booking.fixture.ts
+│   │
+│   └── mobile/
+│       ├── README.md
+│       ├── CODEOWNERS
+│       │
+│       ├── android-sms-gateway/
+│       │   ├── README.md
+│       │   ├── CODEOWNERS
+│       │   ├── build.gradle.kts
+│       │   ├── settings.gradle.kts
+│       │   ├── gradle.properties
+│       │   ├── gradlew
+│       │   ├── gradlew.bat
+│       │   ├── local.properties.example
+│       │   ├── .gitignore
+│       │   ├── .editorconfig
+│       │   ├── .env.dev.example
+│       │   ├── .env.test.example
+│       │   ├── .env.prod.example
+│       │   │
+│       │   ├── gradle/
+│       │   │   └── wrapper/
+│       │   │       ├── gradle-wrapper.jar
+│       │   │       └── gradle-wrapper.properties
+│       │   │
+│       │   ├── app/
+│       │   │   ├── build.gradle.kts
+│       │   │   ├── proguard-rules.pro
+│       │   │   └── src/
+│       │   │       ├── main/
+│       │   │       │   ├── AndroidManifest.xml
+│       │   │       │   │
+│       │   │       │   ├── java/
+│       │   │       │   │   └── com/
+│       │   │       │   │       └── sarathi/
+│       │   │       │   │           └── sris/
+│       │   │       │   │               └── smsgateway/
+│       │   │       │   │                   ├── SmsGatewayApplication.kt
+│       │   │       │   │                   ├── MainActivity.kt
+│       │   │       │   │                   ├── config/
+│       │   │       │   │                   │   ├── EnvConfig.kt
+│       │   │       │   │                   │   ├── EnvValidator.kt
+│       │   │       │   │                   │   ├── GatewayConfig.kt
+│       │   │       │   │                   │   └── Constants.kt
+│       │   │       │   │                   ├── provider/
+│       │   │       │   │                   │   ├── SmsProviderInterface.kt
+│       │   │       │   │                   │   ├── LocalSmsProvider.kt
+│       │   │       │   │                   │   ├── PaidSmsProvider.kt
+│       │   │       │   │                   │   ├── TwilioProviderImpl.kt
+│       │   │       │   │                   │   ├── Msg91ProviderImpl.kt
+│       │   │       │   │                   │   ├── SmsProviderFactory.kt
+│       │   │       │   │                   │   └── ProviderConfig.kt
+│       │   │       │   │                   ├── ui/
+│       │   │       │   │                   │   ├── ConnectionStatusScreen.kt
+│       │   │       │   │                   │   ├── ConnectionStatusViewModel.kt
+│       │   │       │   │                   │   └── theme/
+│       │   │       │   │                   │       ├── Color.kt
+│       │   │       │   │                   │       ├── Theme.kt
+│       │   │       │   │                   │       └── Type.kt
+│       │   │       │   │                   ├── service/
+│       │   │       │   │                   │   ├── SmsForegroundService.kt
+│       │   │       │   │                   │   ├── NotificationChannelManager.kt
+│       │   │       │   │                   │   ├── ServiceStateHolder.kt
+│       │   │       │   │                   │   ├── ServiceAutoStarter.kt
+│       │   │       │   │                   │   └── BootReceiver.kt
+│       │   │       │   │                   ├── http/
+│       │   │       │   │                   │   ├── HttpsServer.kt
+│       │   │       │   │                   │   ├── SendSmsRouteHandler.kt
+│       │   │       │   │                   │   ├── StatusRouteHandler.kt
+│       │   │       │   │                   │   ├── RequestAuthenticator.kt
+│       │   │       │   │                   │   ├── RequestRateLimiter.kt
+│       │   │       │   │                   │   └── TlsConfig.kt
+│       │   │       │   │                   ├── sms/
+│       │   │       │   │                   │   ├── SmsQueue.kt
+│       │   │       │   │                   │   ├── SmsQueueWorker.kt
+│       │   │       │   │                   │   └── SmsResultReceiver.kt
+│       │   │       │   │                   ├── network/
+│       │   │       │   │                   │   ├── TailscaleChecker.kt
+│       │   │       │   │                   │   ├── ConnectivityMonitor.kt
+│       │   │       │   │                   │   ├── PeerVerifier.kt
+│       │   │       │   │                   │   └── TlsTrustManager.kt
+│       │   │       │   │                   ├── data/
+│       │   │       │   │                   │   ├── local/
+│       │   │       │   │                   │   │   ├── AppDatabase.kt
+│       │   │       │   │                   │   │   ├── SmsQueueDao.kt
+│       │   │       │   │                   │   │   ├── SmsQueueEntity.kt
+│       │   │       │   │                   │   │   ├── ConfigDao.kt
+│       │   │       │   │                   │   │   ├── ConfigEntity.kt
+│       │   │       │   │                   │   │   └── Converters.kt
+│       │   │       │   │                   │   └── repository/
+│       │   │       │   │                   │       ├── SmsQueueRepository.kt
+│       │   │       │   │                   │       └── ConfigRepository.kt
+│       │   │       │   │                   ├── di/
+│       │   │       │   │                   │   ├── AppModule.kt
+│       │   │       │   │                   │   ├── NetworkModule.kt
+│       │   │       │   │                   │   └── DataModule.kt
+│       │   │       │   │                   └── util/
+│       │   │       │   │                       ├── Logger.kt
+│       │   │       │   │                       ├── TimestampProvider.kt
+│       │   │       │   │                       ├── BatteryOptimizationHelper.kt
+│       │   │       │   │                       └── NotificationHelper.kt
+│       │   │       │   │
+│       │   │       │   └── res/
+│       │   │       │       ├── values/
+│       │   │       │       │   ├── strings.xml
+│       │   │       │       │   ├── colors.xml
+│       │   │       │       │   └── themes.xml
+│       │   │       │       ├── values-hi/
+│       │   │       │       │   └── strings.xml
+│       │   │       │       ├── values-night/
+│       │   │       │       │   └── themes.xml
+│       │   │       │       ├── drawable/
+│       │   │       │       │   ├── ic_notification.xml
+│       │   │       │       │   ├── ic_launcher_foreground.xml
+│       │   │       │       │   └── ic_launcher_background.xml
+│       │   │       │       ├── mipmap-anydpi-v26/
+│       │   │       │       │   └── ic_launcher.xml
+│       │   │       │       └── xml/
+│       │   │       │           ├── network_security_config.xml
+│       │   │       │           ├── data_extraction_rules.xml
+│       │   │       │           └── backup_rules.xml
+│       │   │       │
+│       │   │       ├── test/
+│       │   │       │   └── java/
+│       │   │       │       └── com/
+│       │   │       │           └── sarathi/
+│       │   │       │               └── sris/
+│       │   │       │                   └── smsgateway/
+│       │   │       │                       ├── sms/
+│       │   │       │                       │   └── SmsQueueTest.kt
+│       │   │       │                       ├── http/
+│       │   │       │                       │   ├── RequestAuthenticatorTest.kt
+│       │   │       │                       │   └── HttpsServerIntegrationTest.kt
+│       │   │       │                       ├── network/
+│       │   │       │                       │   └── TailscaleCheckerTest.kt
+│       │   │       │                       ├── config/
+│       │   │       │                       │   └── EnvValidatorTest.kt
+│       │   │       │                       └── provider/
+│       │   │       │                           ├── LocalSmsProviderTest.kt
+│       │   │       │                           ├── PaidSmsProviderTest.kt
+│       │   │       │                           └── SmsProviderFactoryTest.kt
+│       │   │       │
+│       │   │       └── androidTest/
+│       │   │           └── java/
+│       │   │               └── com/
+│       │   │                   └── sarathi/
+│       │   │                       └── sris/
+│       │   │                           └── smsgateway/
+│       │   │                               ├── SmsForegroundServiceTest.kt
+│       │   │                               └── HttpsServerTest.kt
+│       │   │
+│       │   └── docs/
+│       │       ├── SETUP.md
+│       │       ├── SECURITY.md
+│       │       ├── PROVIDER_SWAP.md
+│       │       ├── TLS_CERTIFICATES.md
+│       │       ├── TROUBLESHOOTING.md
+│       │       └── BATTERY_OPTIMIZATION.md
+│       │
+│       └── message-app/
+│           ├── README.md
+│           ├── CODEOWNERS
+│           ├── pubspec.yaml
+│           ├── pubspec.lock
+│           ├── analysis_options.yaml
+│           ├── .flutter-plugins
+│           ├── .flutter-plugins-dependencies
+│           ├── .gitignore
+│           ├── .env.dev.json
+│           ├── .env.test.json
+│           ├── .env.prod.json
+│           ├── .metadata
+│           │
+│           ├── android/
+│           │   ├── build.gradle
+│           │   ├── settings.gradle
+│           │   ├── gradle.properties
+│           │   ├── gradlew
+│           │   ├── gradlew.bat
+│           │   ├── gradle/
+│           │   │   └── wrapper/
+│           │   │       ├── gradle-wrapper.jar
+│           │   │       └── gradle-wrapper.properties
+│           │   ├── app/
+│           │   │   ├── build.gradle
+│           │   │   ├── proguard-rules.pro
+│           │   │   └── src/
+│           │   │       └── main/
+│           │   │           ├── AndroidManifest.xml
+│           │   │           └── kotlin/
+│           │   │               └── com/
+│           │   │                   └── sarathi/
+│           │   │                       └── sris/
+│           │   │                           └── messageapp/
+│           │   │                               └── MainActivity.kt
+│           │   └── key.properties.example
+│           │
+│           ├── ios/
+│           │   ├── Podfile
+│           │   ├── Runner/
+│           │   │   ├── Info.plist
+│           │   │   └── AppDelegate.swift
+│           │   └── Runner.xcodeproj/
+│           │       └── project.pbxproj
+│           │
+│           ├── lib/
+│           │   ├── main.dart
+│           │   ├── app.dart
+│           │   ├── bootstrap/
+│           │   │   └── error_handler.dart
+│           │   ├── core/
+│           │   │   ├── config/
+│           │   │   │   ├── env.dart
+│           │   │   │   ├── app_config.dart
+│           │   │   │   └── constants.dart
+│           │   │   ├── router/
+│           │   │   │   ├── app_router.dart
+│           │   │   │   └── route_paths.dart
+│           │   │   ├── theme/
+│           │   │   │   ├── app_theme.dart
+│           │   │   │   ├── colors.dart
+│           │   │   │   └── typography.dart
+│           │   │   ├── network/
+│           │   │   │   ├── dio_client.dart
+│           │   │   │   ├── gateway_api.dart
+│           │   │   │   └── network_exceptions.dart
+│           │   │   ├── storage/
+│           │   │   │   ├── secure_storage.dart
+│           │   │   │   └── preferences_storage.dart
+│           │   │   ├── error/
+│           │   │   │   ├── app_error.dart
+│           │   │   │   └── error_messages.dart
+│           │   │   └── utils/
+│           │   │       ├── formatters.dart
+│           │   │       └── validators.dart
+│           │   ├── features/
+│           │   │   ├── pairing/
+│           │   │   │   ├── data/
+│           │   │   │   │   └── pairing_repository.dart
+│           │   │   │   ├── domain/
+│           │   │   │   │   └── pairing_payload.dart
+│           │   │   │   └── presentation/
+│           │   │   │       ├── pairing_page.dart
+│           │   │   │       └── pairing_controller.dart
+│           │   │   ├── status/
+│           │   │   │   ├── data/
+│           │   │   │   │   └── status_repository.dart
+│           │   │   │   ├── domain/
+│           │   │   │   │   └── gateway_status.dart
+│           │   │   │   └── presentation/
+│           │   │   │       ├── status_page.dart
+│           │   │   │       └── status_controller.dart
+│           │   │   ├── provider_config/
+│           │   │   │   ├── data/
+│           │   │   │   │   └── provider_repository.dart
+│           │   │   │   ├── domain/
+│           │   │   │   │   └── provider_settings.dart
+│           │   │   │   └── presentation/
+│           │   │   │       ├── provider_config_page.dart
+│           │   │   │       ├── twilio_credentials_form.dart
+│           │   │   │       ├── msg91_credentials_form.dart
+│           │   │   │       └── provider_config_controller.dart
+│           │   │   ├── delivery_log/
+│           │   │   │   ├── data/
+│           │   │   │   │   └── delivery_log_repository.dart
+│           │   │   │   ├── domain/
+│           │   │   │   │   └── delivery_log_entry.dart
+│           │   │   │   └── presentation/
+│           │   │   │       ├── delivery_log_page.dart
+│           │   │   │       ├── delivery_log_filter_sheet.dart
+│           │   │   │       ├── delivery_log_entry_tile.dart
+│           │   │   │       └── delivery_log_controller.dart
+│           │   │   ├── resend/
+│           │   │   │   ├── data/
+│           │   │   │   │   └── resend_repository.dart
+│           │   │   │   └── presentation/
+│           │   │   │       ├── resend_dialog.dart
+│           │   │   │       └── resend_controller.dart
+│           │   │   ├── emergency/
+│           │   │   │   ├── data/
+│           │   │   │   │   └── emergency_repository.dart
+│           │   │   │   └── presentation/
+│           │   │   │       ├── emergency_pause_button.dart
+│           │   │   │       └── emergency_controller.dart
+│           │   │   └── settings/
+│           │   │       ├── data/
+│           │   │       │   └── settings_repository.dart
+│           │   │       └── presentation/
+│           │   │           ├── settings_page.dart
+│           │   │           └── settings_controller.dart
+│           │   └── shared/
+│           │       ├── widgets/
+│           │       │   ├── app_button.dart
+│           │       │   ├── app_input.dart
+│           │       │   ├── app_card.dart
+│           │       │   ├── status_indicator.dart
+│           │       │   ├── loading_widget.dart
+│           │       │   ├── error_widget.dart
+│           │       │   └── empty_state_widget.dart
+│           │       └── providers/
+│           │           ├── auth_provider.dart
+│           │           ├── connectivity_provider.dart
+│           │           └── settings_provider.dart
+│           │
+│           ├── assets/
+│           │   ├── images/
+│           │   │   ├── logo.png
+│           │   │   └── qr_scan_placeholder.svg
+│           │   └── fonts/
+│           │       └── Inter-Regular.ttf
+│           │
+│           ├── l10n/
+│           │   ├── app_en.arb
+│           │   └── app_hi.arb
+│           │
+│           └── test/
+│               ├── widget/
+│               │   ├── pairing_page_test.dart
+│               │   ├── status_page_test.dart
+│               │   ├── provider_config_page_test.dart
+│               │   └── delivery_log_page_test.dart
+│               ├── unit/
+│               │   ├── pairing_repository_test.dart
+│               │   ├── provider_repository_test.dart
+│               │   └── validators_test.dart
+│               └── integration_test/
+│                   ├── pairing_flow_test.dart
+│                   ├── config_change_flow_test.dart
+│                   └── resend_flow_test.dart
+│
+├── contracts/
+│   ├── README.md
+│   ├── validate-all.sh
+│   │
+│   ├── openapi/
+│   │   ├── s1-iam.openapi.yaml
+│   │   ├── s2-master-data.openapi.yaml
+│   │   ├── s3-reservation.openapi.yaml
+│   │   ├── s4-search-bff.openapi.yaml
+│   │   ├── s5-payment-gateway.openapi.yaml
+│   │   ├── openapi-redocly.yaml
+│   │   ├── dist/
+│   │   │   ├── .gitkeep
+│   │   │   └── .gitignore
+│   │   └── common/
+│   │       ├── error-envelope.schema.yaml
+│   │       ├── pagination.schema.yaml
+│   │       ├── problem-details.schema.yaml
+│   │       ├── idempotency-header.schema.yaml
+│   │       ├── rate-limit-headers.schema.yaml
+│   │       ├── data-classification.schema.yaml
+│   │       └── maintenance-response.schema.yaml
+│   │
+│   ├── asyncapi/
+│   │   ├── s3-reservation-publishes.asyncapi.yaml
+│   │   ├── s6-notification-consumes.asyncapi.yaml
+│   │   ├── asyncapi-generation.json
+│   │   └── common/
+│   │       ├── envelope.schema.yaml
+│   │       ├── headers.schema.yaml
+│   │       ├── dead-letter.schema.yaml
+│   │       └── maintenance-event.asyncapi.yaml
+│   │
+│   ├── examples/
+│   │   ├── s3-booking-created.json
+│   │   ├── s3-booking-confirmed.json
+│   │   ├── s3-booking-waitlisted.json
+│   │   └── s5-payment-callback.json
+│   │
+│   ├── spectral/
+│   │   ├── .spectral.yaml
+│   │   └── .spectral-asyncapi.yaml
+│   │
+│   └── pact/
+│       └── pacts/
+│           └── .gitkeep
+│
+├── database/
+│   ├── README.md
+│   │
+│   ├── naming/
+│   │   └── SRIS-P1-DATA-013_DatabaseNamingConventions.md
+│   │
+│   ├── review/
+│   │   ├── query-review-checklist.md
+│   │   └── index-review-checklist.md
+│   │
+│   ├── initdb/
+│   │   ├── 00-run-init.sh
+│   │   ├── 01-create-databases-dev.sql
+│   │   ├── 02-create-databases-test.sql
+│   │   ├── 03-create-databases-prod.sql
+│   │   ├── 04-grant-privileges.sql
+│   │   ├── 05-set-connection-limits.sql
+│   │   ├── 06-enable-extensions.sql
+│   │   ├── 07-configure-pg-hba.sh
+│   │   ├── 08-create-replication-slots.sql
+│   │   └── 09-create-initial-admin.sql
+│   │
+│   ├── rollback/
+│   │   ├── README.md
+│   │   └── test-rollbacks.sh
+│   │
+│   ├── expected-schema/
+│   │   ├── README.md
+│   │   ├── check-drift.sh
+│   │   ├── regenerate.sh
+│   │   ├── iam.schema.sql
+│   │   ├── master-data.schema.sql
+│   │   ├── reservation.schema.sql
+│   │   └── notification.schema.sql
+│   │
+│   ├── iam/
+│   │   ├── V1__create_users.sql
+│   │   ├── U1__drop_users.sql
+│   │   ├── V2__create_refresh_tokens.sql
+│   │   ├── U2__drop_refresh_tokens.sql
+│   │   ├── V3__create_sessions.sql
+│   │   ├── U3__drop_sessions.sql
+│   │   ├── V4__create_consent_records.sql
+│   │   ├── U4__drop_consent_records.sql
+│   │   ├── V5__create_password_reset_tokens.sql
+│   │   ├── U5__drop_password_reset_tokens.sql
+│   │   ├── V6__create_audit_log.sql
+│   │   ├── U6__drop_audit_log.sql
+│   │   ├── V7__add_retention_indexes.sql
+│   │   ├── U7__drop_retention_indexes.sql
+│   │   ├── V8__add_password_rotation_columns.sql
+│   │   ├── U8__drop_password_rotation_columns.sql
+│   │   ├── V9__add_consent_versioning.sql
+│   │   └── U9__drop_consent_versioning.sql
+│   │
+│   ├── master-data/
+│   │   ├── V1__create_stations.sql
+│   │   ├── U1__drop_stations.sql
+│   │   ├── V2__create_routes_stops.sql
+│   │   ├── U2__drop_routes_stops.sql
+│   │   ├── V3__create_trains_schedules.sql
+│   │   ├── U3__drop_trains_schedules.sql
+│   │   ├── V4__create_coach_compositions.sql
+│   │   ├── U4__drop_coach_compositions.sql
+│   │   ├── V5__create_classes_quotas.sql
+│   │   ├── U5__drop_classes_quotas.sql
+│   │   ├── V6__create_fare_rules.sql
+│   │   ├── U6__drop_fare_rules.sql
+│   │   ├── V7__create_fare_rule_versions.sql
+│   │   ├── U7__drop_fare_rule_versions.sql
+│   │   ├── V8__create_audit_log.sql
+│   │   ├── U8__drop_audit_log.sql
+│   │   ├── V9__add_optimistic_version_column.sql
+│   │   ├── U9__drop_optimistic_version_column.sql
+│   │   ├── V10__add_fulltext_station_search.sql
+│   │   ├── U10__drop_fulltext_station_search.sql
+│   │   ├── V11__create_idempotency_keys.sql
+│   │   └── U11__drop_idempotency_keys.sql
+│   │
+│   ├── reservation/
+│   │   ├── V1__create_seat_matrix.sql
+│   │   ├── U1__drop_seat_matrix.sql
+│   │   ├── V2__create_quota_allocations.sql
+│   │   ├── U2__drop_quota_allocations.sql
+│   │   ├── V3__create_bookings.sql
+│   │   ├── U3__drop_bookings.sql
+│   │   ├── V4__create_passengers.sql
+│   │   ├── U4__drop_passengers.sql
+│   │   ├── V5__create_pnrs.sql
+│   │   ├── U5__drop_pnrs.sql
+│   │   ├── V6__create_waitlist.sql
+│   │   ├── U6__drop_waitlist.sql
+│   │   ├── V7__create_payment_inflight.sql
+│   │   ├── U7__drop_payment_inflight.sql
+│   │   ├── V8__create_outbox.sql
+│   │   ├── U8__drop_outbox.sql
+│   │   ├── V9__create_idempotency_keys.sql
+│   │   ├── U9__drop_idempotency_keys.sql
+│   │   ├── V10__create_audit_log.sql
+│   │   ├── U10__drop_audit_log.sql
+│   │   ├── V11__add_booking_version_column.sql
+│   │   ├── U11__drop_booking_version_column.sql
+│   │   ├── V12__add_seat_lock_columns.sql
+│   │   ├── U12__drop_seat_lock_columns.sql
+│   │   ├── V13__add_saga_state_table.sql
+│   │   ├── U13__drop_saga_state_table.sql
+│   │   ├── V14__add_outbox_dead_letter.sql
+│   │   ├── U14__drop_outbox_dead_letter.sql
+│   │   ├── V15__add_chart_preparation_table.sql
+│   │   └── U15__drop_chart_preparation_table.sql
+│   │
+│   ├── notification/
+│   │   ├── V1__create_templates.sql
+│   │   ├── U1__drop_templates.sql
+│   │   ├── V2__create_delivery_log.sql
+│   │   ├── U2__drop_delivery_log.sql
+│   │   ├── V3__create_consumed_events.sql
+│   │   ├── U3__drop_consumed_events.sql
+│   │   ├── V4__create_retry_queue.sql
+│   │   ├── U4__drop_retry_queue.sql
+│   │   ├── V5__create_dlq.sql
+│   │   ├── U5__drop_dlq.sql
+│   │   ├── V6__add_delivery_metrics_columns.sql
+│   │   └── U6__drop_delivery_metrics_columns.sql
+│   │
+│   └── seed/
+│       ├── master-data-seed.sql
+│       ├── iam-roles-seed.sql
+│       ├── notification-templates-seed.sql
+│       └── prod-reference-data.sql
+│
+├── services/
+│   ├── README.md
+│   │
+│   ├── java/
+│   │   ├── README.md
+│   │   │
+│   │   ├── s2-master-data/
+│   │   │   ├── pom.xml
+│   │   │   ├── checkstyle.xml
+│   │   │   ├── spotbugs-exclude.xml
+│   │   │   ├── mvnw
+│   │   │   ├── mvnw.cmd
+│   │   │   ├── Dockerfile
+│   │   │   ├── .dockerignore
+│   │   │   ├── .mvn/
+│   │   │   │   ├── jvm.config
+│   │   │   │   └── wrapper/
+│   │   │   │       ├── maven-wrapper.properties
+│   │   │   │       └── maven-wrapper.jar
+│   │   │   │
+│   │   │   └── src/
+│   │   │       ├── main/
+│   │   │       │   ├── java/
+│   │   │       │   │   └── com/
+│   │   │       │   │       └── sarathi/
+│   │   │       │   │           └── sris/
+│   │   │       │   │               └── masterdata/
+│   │   │       │   │                   ├── MasterDataApplication.java
+│   │   │       │   │                   ├── config/
+│   │   │       │   │                   │   ├── S2Properties.java
+│   │   │       │   │                   │   ├── WebConfig.java
+│   │   │       │   │                   │   ├── JacksonConfig.java
+│   │   │       │   │                   │   ├── SecurityConfig.java
+│   │   │       │   │                   │   ├── JpaConfig.java
+│   │   │       │   │                   │   ├── HikariConfig.java
+│   │   │       │   │                   │   ├── OpenApiConfig.java
+│   │   │       │   │                   │   ├── FlywayConfig.java
+│   │   │       │   │                   │   ├── FlywayMigrationStrategyConfig.java
+│   │   │       │   │                   │   ├── AuditConfig.java
+│   │   │       │   │                   │   ├── RedisConfig.java
+│   │   │       │   │                   │   ├── RateLimitConfig.java
+│   │   │       │   │                   │   ├── FeatureFlagConfig.java
+│   │   │       │   │                   │   ├── DistributedLockConfig.java
+│   │   │       │   │                   │   ├── ClockConfig.java
+│   │   │       │   │                   │   ├── MaintenanceConfig.java
+│   │   │       │   │                   │   ├── MessageSourceConfig.java
+│   │   │       │   │                   │   ├── AsyncConfig.java
+│   │   │       │   │                   │   ├── ObservabilityConfig.java
+│   │   │       │   │                   │   └── properties/
+│   │   │       │   │                   │       ├── RateLimitProperties.java
+│   │   │       │   │                   │       ├── AuditProperties.java
+│   │   │       │   │                   │       └── MaintenanceProperties.java
+│   │   │       │   │                   ├── domain/
+│   │   │       │   │                   │   ├── package-info.java
+│   │   │       │   │                   │   ├── AggregateRoot.java
+│   │   │       │   │                   │   ├── entity/
+│   │   │       │   │                   │   │   ├── Station.java
+│   │   │       │   │                   │   │   ├── Route.java
+│   │   │       │   │                   │   │   ├── RouteStop.java
+│   │   │       │   │                   │   │   ├── Train.java
+│   │   │       │   │                   │   │   ├── Schedule.java
+│   │   │       │   │                   │   │   ├── CoachComposition.java
+│   │   │       │   │                   │   │   ├── BerthLayout.java
+│   │   │       │   │                   │   │   ├── TravelClass.java
+│   │   │       │   │                   │   │   ├── Quota.java
+│   │   │       │   │                   │   │   ├── FareRule.java
+│   │   │       │   │                   │   │   ├── FareRuleVersion.java
+│   │   │       │   │                   │   │   ├── Concession.java
+│   │   │       │   │                   │   │   └── AuditLog.java
+│   │   │       │   │                   │   ├── dto/
+│   │   │       │   │                   │   │   ├── StationDto.java
+│   │   │       │   │                   │   │   ├── RouteDto.java
+│   │   │       │   │                   │   │   ├── RouteStopDto.java
+│   │   │       │   │                   │   │   ├── TrainDto.java
+│   │   │       │   │                   │   │   ├── ScheduleDto.java
+│   │   │       │   │                   │   │   ├── CoachCompositionDto.java
+│   │   │       │   │                   │   │   ├── FareQuoteRequest.java
+│   │   │       │   │                   │   │   └── FareQuoteResponse.java
+│   │   │       │   │                   │   ├── mapper/
+│   │   │       │   │                   │   │   ├── StationMapper.java
+│   │   │       │   │                   │   │   ├── RouteMapper.java
+│   │   │       │   │                   │   │   ├── TrainMapper.java
+│   │   │       │   │                   │   │   ├── ScheduleMapper.java
+│   │   │       │   │                   │   │   └── FareMapper.java
+│   │   │       │   │                   │   ├── enum/
+│   │   │       │   │                   │   │   ├── QuotaType.java
+│   │   │       │   │                   │   │   ├── ClassCode.java
+│   │   │       │   │                   │   │   ├── DayOfWeek.java
+│   │   │       │   │                   │   │   └── ConcessionType.java
+│   │   │       │   │                   │   └── exception/
+│   │   │       │   │                   │       ├── ApiException.java
+│   │   │       │   │                   │       ├── StationNotFoundException.java
+│   │   │       │   │                   │       ├── RouteValidationException.java
+│   │   │       │   │                   │       └── FareCalculationException.java
+│   │   │       │   │                   ├── api/
+│   │   │       │   │                   │   ├── controller/
+│   │   │       │   │                   │   │   ├── StationController.java
+│   │   │       │   │                   │   │   ├── RouteController.java
+│   │   │       │   │                   │   │   ├── TrainController.java
+│   │   │       │   │                   │   │   ├── ScheduleController.java
+│   │   │       │   │                   │   │   ├── CoachController.java
+│   │   │       │   │                   │   │   ├── FareController.java
+│   │   │       │   │                   │   │   ├── HealthController.java
+│   │   │       │   │                   │   │   ├── MetricsController.java
+│   │   │       │   │                   │   │   └── InternalMaintenanceController.java
+│   │   │       │   │                   │   ├── health/
+│   │   │       │   │                   │   │   ├── DatabaseHealthIndicator.java
+│   │   │       │   │                   │   │   └── RedisHealthIndicator.java
+│   │   │       │   │                   │   ├── advice/
+│   │   │       │   │                   │   │   ├── GlobalExceptionHandler.java
+│   │   │       │   │                   │   │   └── ProblemDetailsAdvice.java
+│   │   │       │   │                   │   └── filter/
+│   │   │       │   │                   │       ├── TraceIdFilter.java
+│   │   │       │   │                   │       ├── RateLimitFilter.java
+│   │   │       │   │                   │       ├── IdempotencyFilter.java
+│   │   │       │   │                   │       ├── MaintenanceFilter.java
+│   │   │       │   │                   │       └── AuditFilter.java
+│   │   │       │   │                   ├── security/
+│   │   │       │   │                   │   ├── JwtAuthoritiesConverter.java
+│   │   │       │   │                   │   ├── RoleChecker.java
+│   │   │       │   │                   │   ├── LogMasker.java
+│   │   │       │   │                   │   ├── DataClassificationLoader.java
+│   │   │       │   │                   │   ├── MaskedFieldRegistry.java
+│   │   │       │   │                   │   ├── InternalAuthFilter.java
+│   │   │       │   │                   │   ├── EmployeeOnly.java
+│   │   │       │   │                   │   └── InputSanitizer.java
+│   │   │       │   │                   ├── util/
+│   │   │       │   │                   │   ├── CorrelationId.java
+│   │   │       │   │                   │   └── DateTimes.java
+│   │   │       │   │                   ├── data/
+│   │   │       │   │                   │   ├── StationRepository.java
+│   │   │       │   │                   │   ├── RouteRepository.java
+│   │   │       │   │                   │   ├── RouteStopRepository.java
+│   │   │       │   │                   │   ├── TrainRepository.java
+│   │   │       │   │                   │   ├── ScheduleRepository.java
+│   │   │       │   │                   │   ├── CoachCompositionRepository.java
+│   │   │       │   │                   │   ├── BerthLayoutRepository.java
+│   │   │       │   │                   │   ├── TravelClassRepository.java
+│   │   │       │   │                   │   ├── QuotaRepository.java
+│   │   │       │   │                   │   ├── FareRuleRepository.java
+│   │   │       │   │                   │   ├── FareRuleVersionRepository.java
+│   │   │       │   │                   │   ├── ConcessionRepository.java
+│   │   │       │   │                   │   └── AuditLogRepository.java
+│   │   │       │   │                   └── core/
+│   │   │       │   │                       ├── IdempotencyStore.java
+│   │   │       │   │                       ├── masterdata/
+│   │   │       │   │                       │   ├── StationService.java
+│   │   │       │   │                       │   ├── RouteService.java
+│   │   │       │   │                       │   ├── TrainService.java
+│   │   │       │   │                       │   ├── ScheduleService.java
+│   │   │       │   │                       │   ├── CoachCompositionService.java
+│   │   │       │   │                       │   ├── MasterDataValidator.java
+│   │   │       │   │                       │   └── DistributedLockService.java
+│   │   │       │   │                       └── pricing/
+│   │   │       │   │                           ├── FareCalculationService.java
+│   │   │       │   │                           ├── FareRuleEvaluator.java
+│   │   │       │   │                           ├── ConcessionApplicator.java
+│   │   │       │   │                           └── PricingEngine.java
+│   │   │       │   │
+│   │   │       │   └── resources/
+│   │   │       │       ├── application.yml
+│   │   │       │       ├── application-default.yml
+│   │   │       │       ├── application-dev.yml
+│   │   │       │       ├── application-test.yml
+│   │   │       │       ├── application-prod.yml
+│   │   │       │       ├── feature-flags.dev.yml
+│   │   │       │       ├── feature-flags.test.yml
+│   │   │       │       ├── feature-flags.prod.yml
+│   │   │       │       ├── messages.properties
+│   │   │       │       ├── banner.txt
+│   │   │       │       ├── layers.xml
+│   │   │       │       ├── logback-spring.xml
+│   │   │       │       ├── logback-spring-dev.xml
+│   │   │       │       ├── logback-spring-test.xml
+│   │   │       │       ├── logback-spring-prod.xml
+│   │   │       │       ├── META-INF/
+│   │   │       │       │   └── spring.factories
+│   │   │       │       └── db/
+│   │   │       │           └── migration/
+│   │   │       │               ├── .gitkeep
+│   │   │       │               └── README.md
+│   │   │       │
+│   │   │       └── test/
+│   │   │           ├── java/
+│   │   │           │   └── com/
+│   │   │           │       └── sarathi/
+│   │   │           │           └── sris/
+│   │   │           │               └── masterdata/
+│   │   │           │                   ├── ApplicationContextIT.java
+│   │   │           │                   ├── architecture/
+│   │   │           │                   │   └── ModuleBoundaryTest.java
+│   │   │           │                   ├── support/
+│   │   │           │                   │   ├── UnitTestBase.java
+│   │   │           │                   │   ├── TestContainersBase.java
+│   │   │           │                   │   ├── RepositoryTestBase.java
+│   │   │           │                   │   └── ClockFixture.java
+│   │   │           │                   ├── unit/
+│   │   │           │                   │   ├── pricing/
+│   │   │           │                   │   │   ├── FareCalculationServiceTest.java
+│   │   │           │                   │   │   └── FareRuleEvaluatorTest.java
+│   │   │           │                   │   └── masterdata/
+│   │   │           │                   │       ├── StationServiceTest.java
+│   │   │           │                   │       ├── RouteServiceTest.java
+│   │   │           │                   │       └── DistributedLockServiceTest.java
+│   │   │           │                   ├── contract/
+│   │   │           │                   │   └── MasterDataContractIT.java
+│   │   │           │                   └── integration/
+│   │   │           │                       ├── StationControllerIT.java
+│   │   │           │                       ├── FareQuoteControllerIT.java
+│   │   │           │                       ├── IdempotencyIT.java
+│   │   │           │                       └── InternalMaintenanceControllerIT.java
+│   │   │           └── resources/
+│   │   │               ├── application-test.yml
+│   │   │               ├── application-integration-test.yml
+│   │   │               └── logback-test.xml
+│   │   │
+│   │   └── s3-reservation/
+│   │       ├── pom.xml
+│   │       ├── checkstyle.xml
+│   │       ├── spotbugs-exclude.xml
+│   │       ├── mvnw
+│   │       ├── mvnw.cmd
+│   │       ├── Dockerfile
+│   │       ├── .dockerignore
+│   │       ├── .mvn/
+│   │       │   ├── jvm.config
+│   │       │   └── wrapper/
+│   │       │       ├── maven-wrapper.properties
+│   │       │       └── maven-wrapper.jar
+│   │       │
+│   │       └── src/
+│   │           ├── main/
+│   │           │   ├── java/
+│   │           │   │   └── com/
+│   │           │   │       └── sarathi/
+│   │           │   │           └── sris/
+│   │           │   │               └── reservation/
+│   │           │   │                   ├── ReservationApplication.java
+│   │           │   │                   ├── config/
+│   │           │   │                   │   ├── S3Properties.java
+│   │           │   │                   │   ├── WebConfig.java
+│   │           │   │                   │   ├── JacksonConfig.java
+│   │           │   │                   │   ├── SecurityConfig.java
+│   │           │   │                   │   ├── JpaConfig.java
+│   │           │   │                   │   ├── HikariConfig.java
+│   │           │   │                   │   ├── RedisConfig.java
+│   │           │   │                   │   ├── RedisDb1Template.java
+│   │           │   │                   │   ├── FlywayConfig.java
+│   │           │   │                   │   ├── OutboxConfig.java
+│   │           │   │                   │   ├── SagaConfig.java
+│   │           │   │                   │   ├── SchedulingConfig.java
+│   │           │   │                   │   ├── RateLimitConfig.java
+│   │           │   │                   │   ├── OpenApiConfig.java
+│   │           │   │                   │   ├── CircuitBreakerConfig.java
+│   │           │   │                   │   ├── FeatureFlagConfig.java
+│   │           │   │                   │   ├── ClockConfig.java
+│   │           │   │                   │   ├── MaintenanceConfig.java
+│   │           │   │                   │   ├── MessageSourceConfig.java
+│   │           │   │                   │   ├── AsyncConfig.java
+│   │           │   │                   │   ├── ObservabilityConfig.java
+│   │           │   │                   │   └── properties/
+│   │           │   │                   │       ├── PaymentProperties.java
+│   │           │   │                   │       ├── FareProperties.java
+│   │           │   │                   │       ├── InventoryProperties.java
+│   │           │   │                   │       ├── SagaProperties.java
+│   │           │   │                   │       └── OutboxProperties.java
+│   │           │   │                   ├── domain/
+│   │           │   │                   │   ├── package-info.java
+│   │           │   │                   │   ├── AggregateRoot.java
+│   │           │   │                   │   ├── DomainEvent.java
+│   │           │   │                   │   ├── entity/
+│   │           │   │                   │   │   ├── SeatMatrix.java
+│   │           │   │                   │   │   ├── Seat.java
+│   │           │   │                   │   │   ├── QuotaAllocation.java
+│   │           │   │                   │   │   ├── Booking.java
+│   │           │   │                   │   │   ├── Passenger.java
+│   │           │   │                   │   │   ├── Pnr.java
+│   │           │   │                   │   │   ├── WaitlistEntry.java
+│   │           │   │                   │   │   ├── PaymentInflight.java
+│   │           │   │                   │   │   ├── OutboxEvent.java
+│   │           │   │                   │   │   ├── OutboxDeadLetter.java
+│   │           │   │                   │   │   ├── SagaState.java
+│   │           │   │                   │   │   ├── IdempotencyKey.java
+│   │           │   │                   │   │   ├── ChartPreparation.java
+│   │           │   │                   │   │   └── AuditLog.java
+│   │           │   │                   │   ├── event/
+│   │           │   │                   │   │   ├── BookingConfirmedEvent.java
+│   │           │   │                   │   │   ├── BookingWaitlistedEvent.java
+│   │           │   │                   │   │   ├── PaymentRefundedEvent.java
+│   │           │   │                   │   │   └── package-info.java
+│   │           │   │                   │   ├── dto/
+│   │           │   │                   │   │   ├── SearchAvailabilityRequest.java
+│   │           │   │                   │   │   ├── AvailabilityResponse.java
+│   │           │   │                   │   │   ├── HoldSeatRequest.java
+│   │           │   │                   │   │   ├── HoldSeatResponse.java
+│   │           │   │                   │   │   ├── InitiateBookingRequest.java
+│   │           │   │                   │   │   ├── BookingResponse.java
+│   │           │   │                   │   │   ├── PaymentCallbackRequest.java
+│   │           │   │                   │   │   ├── CancelBookingRequest.java
+│   │           │   │                   │   │   └── PnrStatusResponse.java
+│   │           │   │                   │   ├── enum/
+│   │           │   │                   │   │   ├── BookingStatus.java
+│   │           │   │                   │   │   ├── SeatStatus.java
+│   │           │   │                   │   │   ├── PaymentStatus.java
+│   │           │   │                   │   │   ├── QuotaType.java
+│   │           │   │                   │   │   └── BerthType.java
+│   │           │   │                   │   ├── valueobject/
+│   │           │   │                   │   │   ├── PnrValue.java
+│   │           │   │                   │   │   ├── JourneySegment.java
+│   │           │   │                   │   │   └── Money.java
+│   │           │   │                   │   └── exception/
+│   │           │   │                   │       ├── ApiException.java
+│   │           │   │                   │       ├── SeatUnavailableException.java
+│   │           │   │                   │       ├── DuplicateBookingException.java
+│   │           │   │                   │       ├── InvalidStateTransitionException.java
+│   │           │   │                   │       ├── PaymentAmbiguousException.java
+│   │           │   │                   │       └── QuotaExhaustedException.java
+│   │           │   │                   ├── api/
+│   │           │   │                   │   ├── controller/
+│   │           │   │                   │   │   ├── AvailabilityController.java
+│   │           │   │                   │   │   ├── BookingController.java
+│   │           │   │                   │   │   ├── HoldController.java
+│   │           │   │                   │   │   ├── PaymentCallbackController.java
+│   │           │   │                   │   │   ├── CancellationController.java
+│   │           │   │                   │   │   ├── PnrController.java
+│   │           │   │                   │   │   ├── HealthController.java
+│   │           │   │                   │   │   ├── MetricsController.java
+│   │           │   │                   │   │   └── InternalMaintenanceController.java
+│   │           │   │                   │   ├── health/
+│   │           │   │                   │   │   ├── DatabaseHealthIndicator.java
+│   │           │   │                   │   │   ├── RedisHealthIndicator.java
+│   │           │   │                   │   │   └── MasterDataHealthIndicator.java
+│   │           │   │                   │   ├── advice/
+│   │           │   │                   │   │   ├── GlobalExceptionHandler.java
+│   │           │   │                   │   │   └── ProblemDetailsAdvice.java
+│   │           │   │                   │   └── filter/
+│   │           │   │                   │       ├── TraceIdFilter.java
+│   │           │   │                   │       ├── IdempotencyFilter.java
+│   │           │   │                   │       ├── RateLimitFilter.java
+│   │           │   │                   │       ├── MaintenanceFilter.java
+│   │           │   │                   │       └── AuditFilter.java
+│   │           │   │                   ├── security/
+│   │           │   │                   │   ├── JwtAuthoritiesConverter.java
+│   │           │   │                   │   ├── CustomerOnly.java
+│   │           │   │                   │   ├── PaymentWebhookAuthenticator.java
+│   │           │   │                   │   ├── LogMasker.java
+│   │           │   │                   │   ├── DataClassificationLoader.java
+│   │           │   │                   │   ├── MaskedFieldRegistry.java
+│   │           │   │                   │   ├── InternalAuthFilter.java
+│   │           │   │                   │   └── InputSanitizer.java
+│   │           │   │                   ├── util/
+│   │           │   │                   │   ├── CorrelationId.java
+│   │           │   │                   │   └── DateTimes.java
+│   │           │   │                   ├── data/
+│   │           │   │                   │   ├── BookingRepository.java
+│   │           │   │                   │   ├── SeatRepository.java
+│   │           │   │                   │   ├── SeatMatrixRepository.java
+│   │           │   │                   │   ├── WaitlistRepository.java
+│   │           │   │                   │   ├── PassengerRepository.java
+│   │           │   │                   │   ├── PnrRepository.java
+│   │           │   │                   │   ├── PaymentInflightRepository.java
+│   │           │   │                   │   ├── OutboxRepository.java
+│   │           │   │                   │   ├── OutboxDeadLetterRepository.java
+│   │           │   │                   │   ├── SagaStateRepository.java
+│   │           │   │                   │   ├── IdempotencyKeyRepository.java
+│   │           │   │                   │   ├── ChartPreparationRepository.java
+│   │           │   │                   │   ├── AuditLogRepository.java
+│   │           │   │                   │   └── QuotaAllocationRepository.java
+│   │           │   │                   └── core/
+│   │           │   │                       ├── event/
+│   │           │   │                       │   └── DomainEventPublisher.java
+│   │           │   │                       ├── inventory/
+│   │           │   │                       │   ├── InventoryService.java
+│   │           │   │                       │   ├── SeatAllocationService.java
+│   │           │   │                       │   ├── SeatHoldService.java
+│   │           │   │                       │   ├── QuotaService.java
+│   │           │   │                       │   ├── AvailabilityCacheService.java
+│   │           │   │                       │   ├── AvailabilityReadModelPublisher.java
+│   │           │   │                       │   └── AvailabilityReadModelPublisherImpl.java
+│   │           │   │                       ├── booking/
+│   │           │   │                       │   ├── BookingService.java
+│   │           │   │                       │   ├── BookingStateMachine.java
+│   │           │   │                       │   ├── PnrGenerator.java
+│   │           │   │                       │   ├── WaitlistService.java
+│   │           │   │                       │   ├── ChartPreparationService.java
+│   │           │   │                       │   ├── CancellationService.java
+│   │           │   │                       │   └── BookingQueryService.java
+│   │           │   │                       ├── payment/
+│   │           │   │                       │   ├── PaymentOrchestrator.java
+│   │           │   │                       │   ├── PaymentAttemptService.java
+│   │           │   │                       │   ├── PaymentCallbackVerifier.java
+│   │           │   │                       │   └── acl/
+│   │           │   │                       │       ├── PaymentGatewayAdapter.java
+│   │           │   │                       │       ├── PaymentRequestMapper.java
+│   │           │   │                       │       └── PaymentResponseMapper.java
+│   │           │   │                       ├── saga/
+│   │           │   │                       │   ├── SagaOrchestrator.java
+│   │           │   │                       │   ├── RefundSaga.java
+│   │           │   │                       │   └── SagaCompensationActions.java
+│   │           │   │                       ├── outbox/
+│   │           │   │                       │   ├── OutboxWriter.java
+│   │           │   │                       │   ├── OutboxRelayScheduler.java
+│   │           │   │                       │   ├── OutboxRelayBackoff.java
+│   │           │   │                       │   ├── OutboxEventSerializer.java
+│   │           │   │                       │   └── OutboxDeadLetterHandler.java
+│   │           │   │                       ├── fare/
+│   │           │   │                       │   └── FareReQuoteClient.java
+│   │           │   │                       ├── masterdata/
+│   │           │   │                       │   └── MasterDataClient.java
+│   │           │   │                       └── resilience/
+│   │           │   │                           └── CircuitBreakerRegistry.java
+│   │           │   │
+│   │           │   └── resources/
+│   │           │       ├── application.yml
+│   │           │       ├── application-default.yml
+│   │           │       ├── application-dev.yml
+│   │           │       ├── application-test.yml
+│   │           │       ├── application-prod.yml
+│   │           │       ├── feature-flags.dev.yml
+│   │           │       ├── feature-flags.test.yml
+│   │           │       ├── feature-flags.prod.yml
+│   │           │       ├── messages.properties
+│   │           │       ├── banner.txt
+│   │           │       ├── layers.xml
+│   │           │       ├── logback-spring.xml
+│   │           │       ├── logback-spring-dev.xml
+│   │           │       ├── logback-spring-test.xml
+│   │           │       ├── logback-spring-prod.xml
+│   │           │       ├── META-INF/
+│   │           │       │   └── spring.factories
+│   │           │       └── db/
+│   │           │           └── migration/
+│   │           │               ├── .gitkeep
+│   │           │               └── README.md
+│   │           │
+│   │           └── test/
+│   │               ├── java/
+│   │               │   └── com/
+│   │               │       └── sarathi/
+│   │               │           └── sris/
+│   │               │               └── reservation/
+│   │               │                   ├── ApplicationContextIT.java
+│   │               │                   ├── architecture/
+│   │               │                   │   └── ModuleBoundaryTest.java
+│   │               │                   ├── support/
+│   │               │                   │   ├── UnitTestBase.java
+│   │               │                   │   ├── TestContainersBase.java
+│   │               │                   │   ├── RepositoryTestBase.java
+│   │               │                   │   ├── ClockFixture.java
+│   │               │                   │   └── RedisFixture.java
+│   │               │                   ├── unit/
+│   │               │                   │   ├── booking/
+│   │               │                   │   │   ├── BookingStateMachineTest.java
+│   │               │                   │   │   ├── PnrGeneratorTest.java
+│   │               │                   │   │   ├── CancellationServiceTest.java
+│   │               │                   │   │   ├── WaitlistServiceTest.java
+│   │               │                   │   │   ├── ChartPreparationServiceTest.java
+│   │               │                   │   │   └── BookingQueryServiceTest.java
+│   │               │                   │   ├── inventory/
+│   │               │                   │   │   ├── SeatAllocationServiceTest.java
+│   │               │                   │   │   └── AvailabilityCacheServiceTest.java
+│   │               │                   │   ├── payment/
+│   │               │                   │   │   └── PaymentAttemptServiceTest.java
+│   │               │                   │   ├── fare/
+│   │               │                   │   │   └── FareReQuoteClientTest.java
+│   │               │                   │   ├── masterdata/
+│   │               │                   │   │   └── MasterDataClientTest.java
+│   │               │                   │   ├── saga/
+│   │               │                   │   │   └── RefundSagaTest.java
+│   │               │                   │   └── outbox/
+│   │               │                   │       └── OutboxRelaySchedulerTest.java
+│   │               │                   ├── contract/
+│   │               │                   │   └── ReservationContractIT.java
+│   │               │                   └── integration/
+│   │               │                       ├── BookingFlowIT.java
+│   │               │                       ├── PaymentCallbackIT.java
+│   │               │                       ├── ConcurrentBookingIT.java
+│   │               │                       ├── IdempotencyIT.java
+│   │               │                       ├── BoundaryIT.java
+│   │               │                       └── InternalMaintenanceControllerIT.java
+│   │               └── resources/
+│   │                   ├── application-test.yml
+│   │                   ├── application-integration-test.yml
+│   │                   └── logback-test.xml
+│   │
+│   ├── node/
+│   │   ├── README.md
+│   │   │
+│   │   ├── s1-iam/
+│   │   │   ├── package.json
+│   │   │   ├── package-lock.json
+│   │   │   ├── tsconfig.json
+│   │   │   ├── tsconfig.build.json
+│   │   │   ├── tsconfig.eslint.json
+│   │   │   ├── nest-cli.json
+│   │   │   ├── jest.config.js
+│   │   │   ├── .eslintrc.js
+│   │   │   ├── .prettierrc
+│   │   │   ├── .npmrc
+│   │   │   ├── Dockerfile
+│   │   │   ├── .dockerignore
+│   │   │   ├── .env.dev.example
+│   │   │   ├── .env.test.example
+│   │   │   ├── .env.prod.example
+│   │   │   ├── prisma/
+│   │   │   │   ├── schema.prisma
+│   │   │   │   └── README.md
+│   │   │   └── src/
+│   │   │       ├── main.ts
+│   │   │       ├── bootstrap.ts
+│   │   │       ├── app.module.ts
+│   │   │       ├── app.controller.ts
+│   │   │       ├── app.service.ts
+│   │   │       ├── bootstrap/
+│   │   │       │   └── migrations.ts
+│   │   │       ├── common/
+│   │   │       │   ├── common.module.ts
+│   │   │       │   ├── index.ts
+│   │   │       │   ├── logger.ts
+│   │   │       │   ├── clock.ts
+│   │   │       │   ├── errors/
+│   │   │       │   │   └── app-error.ts
+│   │   │       │   ├── middleware/
+│   │   │       │   │   ├── request-context.middleware.ts
+│   │   │       │   │   └── error-handler.middleware.ts
+│   │   │       │   ├── health/
+│   │   │       │   │   ├── health.module.ts
+│   │   │       │   │   ├── db.health-indicator.ts
+│   │   │       │   │   └── redis.health-indicator.ts
+│   │   │       │   ├── metrics/
+│   │   │       │   │   └── metrics.module.ts
+│   │   │       │   ├── pipes/
+│   │   │       │   │   └── validation.pipe.ts
+│   │   │       │   └── types/
+│   │   │       │       └── express.d.ts
+│   │   │       ├── config/
+│   │   │       │   ├── configuration.ts
+│   │   │       │   ├── cloud.config.ts
+│   │   │       │   ├── database.config.ts
+│   │   │       │   ├── jwt.config.ts
+│   │   │       │   ├── throttler.config.ts
+│   │   │       │   ├── consent.config.ts
+│   │   │       │   ├── feature-flag.config.ts
+│   │   │       │   ├── maintenance.config.ts
+│   │   │       │   └── observability.config.ts
+│   │   │       ├── domain/
+│   │   │       │   ├── entities/
+│   │   │       │   │   ├── user.entity.ts
+│   │   │       │   │   ├── role.entity.ts
+│   │   │       │   │   ├── token.entity.ts
+│   │   │       │   │   ├── consent.entity.ts
+│   │   │       │   │   ├── session.entity.ts
+│   │   │       │   │   └── password-reset-token.entity.ts
+│   │   │       │   ├── dtos/
+│   │   │       │   │   ├── login.dto.ts
+│   │   │       │   │   ├── register.dto.ts
+│   │   │       │   │   ├── refresh-token.dto.ts
+│   │   │       │   │   ├── logout.dto.ts
+│   │   │       │   │   ├── password-reset-request.dto.ts
+│   │   │       │   │   ├── password-reset-confirm.dto.ts
+│   │   │       │   │   ├── consent.dto.ts
+│   │   │       │   │   └── update-profile.dto.ts
+│   │   │       │   ├── enums/
+│   │   │       │   │   ├── role.enum.ts
+│   │   │       │   │   ├── token-type.enum.ts
+│   │   │       │   │   ├── consent-purpose.enum.ts
+│   │   │       │   │   └── user-status.enum.ts
+│   │   │       │   ├── value-objects/
+│   │   │       │   │   ├── email.vo.ts
+│   │   │       │   │   └── password-hash.vo.ts
+│   │   │       │   └── exceptions/
+│   │   │       │       ├── invalid-credentials.exception.ts
+│   │   │       │       ├── token-expired.exception.ts
+│   │   │       │       ├── token-reused.exception.ts
+│   │   │       │       └── consent-required.exception.ts
+│   │   │       ├── security/
+│   │   │       │   ├── guards/
+│   │   │       │   │   ├── jwt-auth.guard.ts
+│   │   │       │   │   ├── roles.guard.ts
+│   │   │       │   │   └── consent.guard.ts
+│   │   │       │   ├── strategies/
+│   │   │       │   │   ├── jwt.strategy.ts
+│   │   │       │   │   └── refresh-token.strategy.ts
+│   │   │       │   ├── decorators/
+│   │   │       │   │   ├── roles.decorator.ts
+│   │   │       │   │   ├── public.decorator.ts
+│   │   │       │   │   └── current-user.decorator.ts
+│   │   │       │   ├── password/
+│   │   │       │   │   ├── password-hasher.service.ts
+│   │   │       │   │   └── password-strength.validator.ts
+│   │   │       │   ├── tokens/
+│   │   │       │   │   ├── token-signer.service.ts
+│   │   │       │   │   ├── token-verifier.service.ts
+│   │   │       │   │   └── refresh-token-rotator.service.ts
+│   │   │       │   ├── internal-token-verifier.service.ts
+│   │   │       │   ├── role-denial-audit.service.ts
+│   │   │       │   └── masking/
+│   │   │       │       └── log-masker.ts
+│   │   │       ├── api/
+│   │   │       │   ├── auth.controller.ts
+│   │   │       │   ├── password-reset.controller.ts
+│   │   │       │   ├── profile.controller.ts
+│   │   │       │   ├── consent.controller.ts
+│   │   │       │   ├── health.controller.ts
+│   │   │       │   ├── metrics.controller.ts
+│   │   │       │   ├── maintenance.controller.ts
+│   │   │       │   └── interceptors/
+│   │   │       │       ├── response-envelope.interceptor.ts
+│   │   │       │       ├── request-logger.interceptor.ts
+│   │   │       │       ├── rate-limit.interceptor.ts
+│   │   │       │       ├── idempotency.interceptor.ts
+│   │   │       │       └── maintenance.interceptor.ts
+│   │   │       ├── core/
+│   │   │       │   ├── auth.service.ts
+│   │   │       │   ├── token.service.ts
+│   │   │       │   ├── refresh-token.service.ts
+│   │   │       │   ├── session.service.ts
+│   │   │       │   ├── password-reset.service.ts
+│   │   │       │   ├── consent.service.ts
+│   │   │       │   ├── profile.service.ts
+│   │   │       │   └── retention.service.ts
+│   │   │       └── data/
+│   │   │           ├── user.repository.ts
+│   │   │           ├── token.repository.ts
+│   │   │           ├── consent.repository.ts
+│   │   │           ├── session.repository.ts
+│   │   │           ├── password-reset-token.repository.ts
+│   │   │           └── prisma/
+│   │   │               ├── prisma.service.ts
+│   │   │               └── prisma.module.ts
+│   │   │       (test files continue — see test/support, test/unit, test/contract, test/integration, test/fixtures)
+│   │   │       ├── test/
+│   │   │       │   ├── support/
+│   │   │       │   │   ├── testcontainers.ts
+│   │   │       │   │   ├── test-db.ts
+│   │   │       │   │   ├── clock-fixture.ts
+│   │   │       │   │   ├── nest-testing.ts
+│   │   │       │   │   └── contract-testing.ts
+│   │   │       │   ├── unit/
+│   │   │       │   │   ├── auth.service.spec.ts
+│   │   │       │   │   ├── token-signer.spec.ts
+│   │   │       │   │   ├── refresh-rotator.spec.ts
+│   │   │       │   │   ├── password-hasher.spec.ts
+│   │   │       │   │   ├── consent.service.spec.ts
+│   │   │       │   │   ├── session-invalidation.spec.ts
+│   │   │       │   │   ├── profile.service.spec.ts
+│   │   │       │   │   └── roles.guard.spec.ts
+│   │   │       │   ├── contract/
+│   │   │       │   │   └── iam.contract.spec.ts
+│   │   │       │   ├── integration/
+│   │   │       │   │   ├── auth.e2e-spec.ts
+│   │   │       │   │   ├── consent.e2e-spec.ts
+│   │   │       │   │   ├── idempotency.e2e-spec.ts
+│   │   │       │   │   └── maintenance.e2e-spec.ts
+│   │   │       │   └── fixtures/
+│   │   │       │       ├── user.fixture.ts
+│   │   │       │       └── token.fixture.ts
+│   │   │
+│   │   ├── s4-search-bff/
+│   │   │   ├── package.json
+│   │   │   ├── package-lock.json
+│   │   │   ├── tsconfig.json
+│   │   │   ├── tsconfig.build.json
+│   │   │   ├── tsconfig.eslint.json
+│   │   │   ├── nest-cli.json
+│   │   │   ├── jest.config.js
+│   │   │   ├── .eslintrc.js
+│   │   │   ├── .prettierrc
+│   │   │   ├── .npmrc
+│   │   │   ├── Dockerfile
+│   │   │   ├── .dockerignore
+│   │   │   ├── .env.dev.example
+│   │   │   ├── .env.test.example
+│   │   │   ├── .env.prod.example
+│   │   │   └── src/
+│   │   │       ├── main.ts
+│   │   │       ├── bootstrap.ts
+│   │   │       ├── app.module.ts
+│   │   │       ├── app.controller.ts
+│   │   │       ├── app.service.ts
+│   │   │       ├── common/
+│   │   │       │   ├── common.module.ts
+│   │   │       │   ├── index.ts
+│   │   │       │   ├── logger.ts
+│   │   │       │   ├── clock.ts
+│   │   │       │   ├── errors/
+│   │   │       │   │   └── app-error.ts
+│   │   │       │   ├── middleware/
+│   │   │       │   │   ├── request-context.middleware.ts
+│   │   │       │   │   └── error-handler.middleware.ts
+│   │   │       │   ├── health/
+│   │   │       │   │   ├── health.module.ts
+│   │   │       │   │   ├── redis.health-indicator.ts
+│   │   │       │   │   └── s2.health-indicator.ts
+│   │   │       │   ├── metrics/
+│   │   │       │   │   └── metrics.module.ts
+│   │   │       │   ├── pipes/
+│   │   │       │   │   └── validation.pipe.ts
+│   │   │       │   └── types/
+│   │   │       │       └── express.d.ts
+│   │   │       ├── config/
+│   │   │       │   ├── configuration.ts
+│   │   │       │   ├── cloud.config.ts
+│   │   │       │   ├── redis.config.ts
+│   │   │       │   ├── masterdata-client.config.ts
+│   │   │       │   ├── throttler.config.ts
+│   │   │       │   ├── maintenance.config.ts
+│   │   │       │   └── observability.config.ts
+│   │   │       ├── domain/
+│   │   │       │   ├── dtos/
+│   │   │       │   │   ├── search-request.dto.ts
+│   │   │       │   │   ├── search-response.dto.ts
+│   │   │       │   │   ├── train-result.dto.ts
+│   │   │       │   │   ├── availability-slot.dto.ts
+│   │   │       │   │   └── partial-response.dto.ts
+│   │   │       │   ├── enums/
+│   │   │       │   │   └── degradation-reason.enum.ts
+│   │   │       │   └── exceptions/
+│   │   │       │       ├── downstream-unavailable.exception.ts
+│   │   │       │       └── invalid-query.exception.ts
+│   │   │       ├── security/
+│   │   │       │   ├── guards/
+│   │   │       │   │   └── jwt-auth.guard.ts
+│   │   │       │   ├── decorators/
+│   │   │       │   │   └── public-search.decorator.ts
+│   │   │       │   ├── internal-token-verifier.service.ts
+│   │   │       │   └── masking/
+│   │   │       │       └── log-masker.ts
+│   │   │       ├── api/
+│   │   │       │   ├── search.controller.ts
+│   │   │       │   ├── health.controller.ts
+│   │   │       │   ├── metrics.controller.ts
+│   │   │       │   ├── maintenance.controller.ts
+│   │   │       │   └── interceptors/
+│   │   │       │       ├── partial-response.interceptor.ts
+│   │   │       │       ├── rate-limit.interceptor.ts
+│   │   │       │       └── maintenance.interceptor.ts
+│   │   │       ├── core/
+│   │   │       │   ├── search-aggregator.service.ts
+│   │   │       │   ├── masterdata-client.service.ts
+│   │   │       │   ├── availability-read.service.ts
+│   │   │       │   ├── response-composer.service.ts
+│   │   │       │   ├── degradation.service.ts
+│   │   │       │   ├── cache.service.ts
+│   │   │       │   ├── search-query-validator.ts
+│   │   │       │   └── resilience/
+│   │   │       │       └── circuit-breaker-registry.ts
+│   │   │       ├── data/
+│   │   │       │   ├── redis/
+│   │   │       │   │   ├── availability-read.repository.ts
+│   │   │       │   │   ├── availability-read-model.schema.ts
+│   │   │       │   │   └── redis.module.ts
+│   │   │       │   └── http/
+│   │   │       │       ├── masterdata-http.client.ts
+│   │   │       │       └── http.module.ts
+│   │   │       └── test/
+│   │   │           ├── support/
+│   │   │           │   ├── testcontainers.ts
+│   │   │           │   ├── redis-fixture.ts
+│   │   │           │   ├── clock-fixture.ts
+│   │   │           │   └── nest-testing.ts
+│   │   │           ├── unit/
+│   │   │           │   ├── search-aggregator.service.spec.ts
+│   │   │           │   ├── degradation.service.spec.ts
+│   │   │           │   └── response-composer.spec.ts
+│   │   │           └── integration/
+│   │   │               ├── search.e2e-spec.ts
+│   │   │               └── maintenance.e2e-spec.ts
+│   │   │
+│   │   ├── s5-payment-gateway/
+│   │   │   ├── package.json
+│   │   │   ├── package-lock.json
+│   │   │   ├── tsconfig.json
+│   │   │   ├── tsconfig.build.json
+│   │   │   ├── tsconfig.eslint.json
+│   │   │   ├── nest-cli.json
+│   │   │   ├── jest.config.js
+│   │   │   ├── .eslintrc.js
+│   │   │   ├── .prettierrc
+│   │   │   ├── .npmrc
+│   │   │   ├── Dockerfile
+│   │   │   ├── .dockerignore
+│   │   │   ├── .env.dev.example
+│   │   │   ├── .env.test.example
+│   │   │   ├── .env.prod.example
+│   │   │   └── src/
+│   │   │       ├── main.ts
+│   │   │       ├── bootstrap.ts
+│   │   │       ├── app.module.ts
+│   │   │       ├── app.controller.ts
+│   │   │       ├── app.service.ts
+│   │   │       ├── common/
+│   │   │       │   ├── common.module.ts
+│   │   │       │   ├── index.ts
+│   │   │       │   ├── logger.ts
+│   │   │       │   ├── clock.ts
+│   │   │       │   ├── errors/
+│   │   │       │   │   └── app-error.ts
+│   │   │       │   ├── middleware/
+│   │   │       │   │   ├── request-context.middleware.ts
+│   │   │       │   │   └── error-handler.middleware.ts
+│   │   │       │   ├── health/
+│   │   │       │   │   ├── health.module.ts
+│   │   │       │   │   └── provider.health-indicator.ts
+│   │   │       │   ├── metrics/
+│   │   │       │   │   └── metrics.module.ts
+│   │   │       │   ├── pipes/
+│   │   │       │   │   └── validation.pipe.ts
+│   │   │       │   └── types/
+│   │   │       │       └── express.d.ts
+│   │   │       ├── config/
+│   │   │       │   ├── configuration.ts
+│   │   │       │   ├── cloud.config.ts
+│   │   │       │   ├── cloud.endpoint-validator.ts
+│   │   │       │   ├── provider.config.ts
+│   │   │       │   ├── webhook.config.ts
+│   │   │       │   ├── throttler.config.ts
+│   │   │       │   ├── maintenance.config.ts
+│   │   │       │   └── observability.config.ts
+│   │   │       ├── domain/
+│   │   │       │   ├── dtos/
+│   │   │       │   │   ├── payment-initiate.dto.ts
+│   │   │       │   │   ├── payment-result.dto.ts
+│   │   │       │   │   ├── refund.dto.ts
+│   │   │       │   │   └── webhook-payload.dto.ts
+│   │   │       │   ├── enums/
+│   │   │       │   │   ├── payment-status.enum.ts
+│   │   │       │   │   └── provider-mode.enum.ts
+│   │   │       │   └── exceptions/
+│   │   │       │       ├── payment-declined.exception.ts
+│   │   │       │       └── provider-config.error.ts
+│   │   │       ├── security/
+│   │   │       │   ├── guards/
+│   │   │       │   │   └── jwt-auth.guard.ts
+│   │   │       │   ├── signature/
+│   │   │       │   │   ├── webhook-signer.service.ts
+│   │   │       │   │   └── webhook-verifier.service.ts
+│   │   │       │   ├── internal-token-verifier.service.ts
+│   │   │       │   └── masking/
+│   │   │       │       └── card-masker.ts
+│   │   │       ├── api/
+│   │   │       │   ├── payment.controller.ts
+│   │   │       │   ├── health.controller.ts
+│   │   │       │   ├── metrics.controller.ts
+│   │   │       │   ├── maintenance.controller.ts
+│   │   │       │   └── interceptors/
+│   │   │       │       ├── webhook-signature.interceptor.ts
+│   │   │       │       ├── rate-limit.interceptor.ts
+│   │   │       │       ├── idempotency.interceptor.ts
+│   │   │       │       └── maintenance.interceptor.ts
+│   │   │       ├── core/
+│   │   │       │   ├── payment.service.ts
+│   │   │       │   ├── refund.service.ts
+│   │   │       │   ├── webhook-dispatcher.service.ts
+│   │   │       │   ├── webhook-retry.service.ts
+│   │   │       │   └── providers/
+│   │   │       │       ├── README.md
+│   │   │       │       ├── provider.interface.ts
+│   │   │       │       ├── provider.loader.ts
+│   │   │       │       ├── provider.factory.ts
+│   │   │       │       ├── provider.preflight.ts
+│   │   │       │       ├── simulator.provider.ts
+│   │   │       │       └── stub-real.provider.ts
+│   │   │       └── data/
+│   │   │           ├── simulated-transaction.store.ts
+│   │   │           └── webhook-retry.store.ts
+│   │   │       (test continues — see test/support, test/fixtures, test/unit, test/integration, test/provider-swap)
+│   │   │
+│   │   └── s6-notification/
+│   │       ├── package.json
+│   │       ├── package-lock.json
+│   │       ├── tsconfig.json
+│   │       ├── tsconfig.build.json
+│   │       ├── tsconfig.eslint.json
+│   │       ├── tsconfig.sidecar.json
+│   │       ├── nest-cli.json
+│   │       ├── jest.config.js
+│   │       ├── .eslintrc.js
+│   │       ├── .prettierrc
+│   │       ├── .npmrc
+│   │       ├── Dockerfile
+│   │       ├── Dockerfile.sidecar
+│   │       ├── docker-compose.snippet.yml
+│   │       ├── SIDECAR.md
+│   │       ├── .dockerignore
+│   │       ├── .env.dev.example
+│   │       ├── .env.test.example
+│   │       ├── .env.prod.example
+│   │       ├── prisma/
+│   │       │   ├── schema.prisma
+│   │       │   └── README.md
+│   │       └── src/
+│   │           ├── main.ts
+│   │           ├── bootstrap.ts
+│   │           ├── app.module.ts
+│   │           ├── app.controller.ts
+│   │           ├── app.service.ts
+│   │           ├── common/
+│   │           │   ├── common.module.ts
+│   │           │   ├── index.ts
+│   │           │   ├── logger.ts
+│   │           │   ├── clock.ts
+│   │           │   ├── errors/
+│   │           │   │   └── app-error.ts
+│   │           │   ├── middleware/
+│   │           │   │   ├── request-context.middleware.ts
+│   │           │   │   └── error-handler.middleware.ts
+│   │           │   ├── health/
+│   │           │   │   ├── health.module.ts
+│   │           │   │   ├── db.health-indicator.ts
+│   │           │   │   └── redis.health-indicator.ts
+│   │           │   ├── metrics/
+│   │           │   │   └── metrics.module.ts
+│   │           │   ├── pipes/
+│   │           │   │   └── validation.pipe.ts
+│   │           │   └── types/
+│   │           │       └── express.d.ts
+│   │           ├── config/
+│   │           │   ├── configuration.ts
+│   │           │   ├── cloud.config.ts
+│   │           │   ├── redis.config.ts
+│   │           │   ├── database.config.ts
+│   │           │   ├── email.config.ts
+│   │           │   ├── sms.config.ts
+│   │           │   ├── maintenance.config.ts
+│   │           │   └── observability.config.ts
+│   │           ├── domain/
+│   │           │   ├── entities/
+│   │           │   │   ├── template.entity.ts
+│   │           │   │   ├── delivery-log.entity.ts
+│   │           │   │   ├── consumed-event.entity.ts
+│   │           │   │   └── retry-queue.entity.ts
+│   │           │   ├── dtos/
+│   │           │   │   ├── booking-confirmed.event.ts
+│   │           │   │   ├── booking-waitlisted.event.ts
+│   │           │   │   ├── payment-refunded.event.ts
+│   │           │   │   ├── send-email.dto.ts
+│   │           │   │   └── send-sms.dto.ts
+│   │           │   ├── enums/
+│   │           │   │   ├── delivery-status.enum.ts
+│   │           │   │   └── channel.enum.ts
+│   │           │   └── exceptions/
+│   │           │       ├── delivery-failed.exception.ts
+│   │           │       └── template-not-found.exception.ts
+│   │           ├── security/
+│   │           │   ├── internal-token-verifier.service.ts
+│   │           │   ├── masking/
+│   │           │   │   └── pii-masker.ts
+│   │           │   └── smtp-auth.service.ts
+│   │           ├── api/
+│   │           │   ├── health.controller.ts
+│   │           │   ├── metrics.controller.ts
+│   │           │   ├── maintenance.controller.ts
+│   │           │   └── interceptors/
+│   │           │       └── maintenance.interceptor.ts
+│   │           ├── core/
+│   │           │   ├── consumers/
+│   │           │   │   ├── booking-event.consumer.ts
+│   │           │   │   ├── payment-event.consumer.ts
+│   │           │   │   └── consumer-group.service.ts
+│   │           │   ├── senders/
+│   │           │   │   ├── email-sender.service.ts
+│   │           │   │   ├── sms-sender.service.ts
+│   │           │   │   ├── sender-router.service.ts
+│   │           │   │   ├── email-validator.ts
+│   │           │   │   └── sms-validator.ts
+│   │           │   ├── template.service.ts
+│   │           │   ├── delivery-log.service.ts
+│   │           │   ├── retry.service.ts
+│   │           │   └── deduplication.service.ts
+│   │           ├── data/
+│   │           │   ├── template.repository.ts
+│   │           │   ├── delivery-log.repository.ts
+│   │           │   ├── consumed-event.repository.ts
+│   │           │   ├── retry-queue.repository.ts
+│   │           │   └── prisma/
+│   │           │       ├── prisma.service.ts
+│   │           │       └── prisma.module.ts
+│   │           └── test/
+│   │               ├── support/
+│   │               │   ├── testcontainers.ts
+│   │               │   ├── redis-stream-fixture.ts
+│   │               │   ├── clock-fixture.ts
+│   │               │   └── nest-testing.ts
+│   │               ├── unit/
+│   │               │   ├── booking-event.consumer.spec.ts
+│   │               │   ├── email-sender.spec.ts
+│   │               │   ├── sms-sender.spec.ts
+│   │               │   └── deduplication.spec.ts
+│   │               └── integration/
+│   │                   ├── notification.e2e-spec.ts
+│   │                   └── maintenance.e2e-spec.ts
+│   │
+│   └── python/
+│       ├── README.md
+│       └── s6-py-daemon/
+│           ├── pyproject.toml
+│           ├── requirements.txt
+│           ├── requirements-dev.txt
+│           ├── MANIFEST.in
+│           ├── ruff.toml
+│           ├── mypy.ini
+│           ├── .python-version
+│           ├── .coveragerc
+│           ├── tox.ini
+│           ├── .dockerignore
+│           ├── Dockerfile
+│           ├── .env.dev.example
+│           ├── .env.test.example
+│           ├── .env.prod.example
+│           └── src/
+│               ├── __init__.py
+│               ├── __main__.py
+│               ├── main.py
+│               ├── app.py
+│               ├── config.py
+│               ├── logging_setup.py
+│               ├── sris_ops_engine/
+│               │   ├── __init__.py
+│               │   ├── __main__.py
+│               │   ├── py.typed
+│               │   ├── startup.py
+│               │   ├── api/
+│               │   │   ├── __init__.py
+│               │   │   ├── health.py
+│               │   │   ├── health_checks.py
+│               │   │   ├── metrics.py
+│               │   │   ├── status.py
+│               │   │   └── maintenance.py
+│               │   ├── config/
+│               │   │   ├── __init__.py
+│               │   │   ├── settings.py
+│               │   │   ├── alert_thresholds.py
+│               │   │   └── monitoring_settings.py
+│               │   ├── util/
+│               │   │   ├── __init__.py
+│               │   │   └── logging_helpers.py
+│               │   ├── monitoring/
+│               │   │   ├── __init__.py
+│               │   │   ├── psutil_collector.py
+│               │   │   ├── container_stats_collector.py
+│               │   │   └── metrics_publisher.py
+│               │   ├── anomaly/
+│               │   │   ├── __init__.py
+│               │   │   ├── model_paths.py
+│               │   │   ├── feature_extractor.py
+│               │   │   ├── behavioral_anomaly_detector.py
+│               │   │   ├── baseline_trainer.py
+│               │   │   └── models/
+│               │   │       └── .gitkeep
+│               │   ├── governance/
+│               │   │   ├── __init__.py
+│               │   │   ├── memory_guard.py
+│               │   │   ├── oom_predictor.py
+│               │   │   ├── alert_escalator.py
+│               │   │   ├── notifier.py
+│               │   │   ├── maintenance_guard.py
+│               │   │   └── self_health.py
+│               │   └── tests/
+│               │       ├── __init__.py
+│               │       ├── conftest.py
+│               │       ├── test_psutil_collector.py
+│               │       ├── test_behavioral_anomaly_detector.py
+│               │       ├── test_memory_guard.py
+│               │       ├── test_oom_predictor.py
+│               │       ├── test_alert_escalator.py
+│               │       └── fixtures/
+│               │           └── sample_traffic.json
+│               └── tests/
+│                   ├── __init__.py
+│                   ├── conftest.py
+│                   └── test_app_boot.py
+│
+├── infra/
+│   ├── README.md
+│   │
+│   ├── docker/
+│   │   ├── README.md
+│   │   ├── s1-iam.Dockerfile
+│   │   ├── s2-master-data.Dockerfile
+│   │   ├── s3-reservation.Dockerfile
+│   │   ├── s4-search-bff.Dockerfile
+│   │   ├── s5-payment-gateway.Dockerfile
+│   │   ├── s6-notification.Dockerfile
+│   │   ├── s6-py-daemon.Dockerfile
+│   │   ├── frontend.Dockerfile
+│   │   └── monitoring/
+│   │       ├── prometheus.Dockerfile
+│   │       ├── grafana.Dockerfile
+│   │       ├── loki.Dockerfile
+│   │       └── promtail.Dockerfile
+│   │
+│   ├── compose/
+│   │   ├── README.md
+│   │   ├── base.yml
+│   │   ├── modules/
+│   │   │   ├── infra.yml
+│   │   │   ├── services.yml
+│   │   │   ├── gateway.yml
+│   │   │   ├── monitoring.yml
+│   │   │   ├── monitoring-dev.yml
+│   │   │   ├── monitoring-test.yml
+│   │   │   ├── monitoring-prod.yml
+│   │   │   ├── maintenance.yml
+│   │   │   ├── maintenance-scheduler.yml
+│   │   │   ├── maintenance-scheduler-host.yml
+│   │   │   ├── maintenance-page.yml
+│   │   │   ├── cron.yml
+│   │   │   ├── otel.yml
+│   │   │   ├── tempo.yml
+│   │   │   ├── alertmanager.yml
+│   │   │   ├── exporters.yml
+│   │   │   ├── pact-broker.yml
+│   │   │   ├── k6.yml
+│   │   │   ├── stubs.yml
+│   │   │   └── frontend.yml
+│   │   └── environments/
+│   │       ├── dev.yml
+│   │       ├── test.yml
+│   │       └── prod.yml
+│   │
+│   ├── nginx/
+│   │   ├── nginx.conf
+│   │   ├── README.md
+│   │   ├── conf.d/
+│   │   │   ├── shared/
+│   │   │   │   ├── default.conf
+│   │   │   │   └── ssl-redirect.conf
+│   │   │   ├── dev/
+│   │   │   │   ├── s1-iam.conf
+│   │   │   │   ├── s2-master-data.conf
+│   │   │   │   ├── s3-reservation.conf
+│   │   │   │   ├── s4-search-bff.conf
+│   │   │   │   ├── s5-payment-gateway.conf
+│   │   │   │   └── grafana.conf
+│   │   │   ├── test/
+│   │   │   │   ├── s1-iam.conf
+│   │   │   │   ├── s2-master-data.conf
+│   │   │   │   ├── s3-reservation.conf
+│   │   │   │   ├── s4-search-bff.conf
+│   │   │   │   ├── s5-payment-gateway.conf
+│   │   │   │   └── grafana.conf
+│   │   │   └── prod/
+│   │   │       ├── s1-iam.conf
+│   │   │       ├── s2-master-data.conf
+│   │   │       ├── s3-reservation.conf
+│   │   │       ├── s4-search-bff.conf
+│   │   │       ├── s5-payment-gateway.conf
+│   │   │       └── grafana.conf
+│   │   ├── snippets/
+│   │   │   ├── proxy-headers.conf
+│   │   │   ├── rate-limit.conf
+│   │   │   ├── ssl.conf
+│   │   │   ├── health-check.conf
+│   │   │   └── maintenance.conf
+│   │   └── certs/
+│   │       └── .gitkeep
+│   │
+│   ├── prometheus/
+│   │   ├── README.md
+│   │   ├── prometheus-dev.yml
+│   │   ├── prometheus-test.yml
+│   │   ├── prometheus-prod.yml
+│   │   ├── recording-rules.yml
+│   │   └── alerts/
+│   │       ├── dev/
+│   │       │   ├── memory-envelope.yml
+│   │       │   ├── cpu.yml
+│   │       │   └── service-down.yml
+│   │       ├── test/
+│   │       │   ├── memory-envelope.yml
+│   │       │   ├── cpu.yml
+│   │       │   └── service-down.yml
+│   │       └── prod/
+│   │           ├── memory-envelope.yml
+│   │           ├── cpu.yml
+│   │           ├── service-down.yml
+│   │           ├── s6py-self-health.yml
+│   │           ├── booking-latency.yml
+│   │           ├── payment-ambiguity.yml
+│   │           ├── outbox-lag.yml
+│   │           └── maintenance-active.yml
+│   │
+│   ├── grafana/
+│   │   ├── README.md
+│   │   ├── provisioning/
+│   │   │   ├── datasources/
+│   │   │   │   ├── prometheus.yml
+│   │   │   │   ├── loki.yml
+│   │   │   │   └── tempo.yml
+│   │   │   ├── dashboards/
+│   │   │   │   └── default.yml
+│   │   │   └── alerting/
+│   │   │       └── contact-points.yml
+│   │   └── dashboards/
+│   │       ├── dev/
+│   │       │   ├── service-overview.json
+│   │       │   ├── booking-flow.json
+│   │       │   ├── memory-envelope.json
+│   │       │   ├── database-health.json
+│   │       │   ├── redis-health.json
+│   │       │   ├── host-resource.json
+│   │       │   └── logs-explorer.json
+│   │       ├── test/
+│   │       │   ├── service-overview.json
+│   │       │   ├── booking-flow.json
+│   │       │   ├── memory-envelope.json
+│   │       │   ├── database-health.json
+│   │       │   ├── redis-health.json
+│   │       │   ├── host-resource.json
+│   │       │   └── logs-explorer.json
+│   │       └── prod/
+│   │           ├── service-overview.json
+│   │           ├── booking-flow.json
+│   │           ├── memory-envelope.json
+│   │           ├── s6py-engine-health.json
+│   │           ├── database-health.json
+│   │           ├── redis-health.json
+│   │           ├── host-resource.json
+│   │           └── logs-explorer.json
+│   │
+│   ├── loki/
+│   │   ├── README.md
+│   │   ├── loki-dev.yml
+│   │   ├── loki-test.yml
+│   │   └── loki-prod.yml
+│   │
+│   ├── promtail/
+│   │   ├── README.md
+│   │   ├── promtail-dev.yml
+│   │   ├── promtail-test.yml
+│   │   └── promtail-prod.yml
+│   │
+│   ├── tempo/
+│   │   ├── README.md
+│   │   ├── tempo-dev.yml
+│   │   ├── tempo-test.yml
+│   │   └── tempo-prod.yml
+│   │
+│   ├── otel/
+│   │   ├── README.md
+│   │   └── otel-collector-config.yml
+│   │
+│   ├── alertmanager/
+│   │   ├── README.md
+│   │   ├── alertmanager-dev.yml
+│   │   ├── alertmanager-test.yml
+│   │   ├── alertmanager-prod.yml
+│   │   ├── receivers/
+│   │   │   └── prod/
+│   │   │       ├── central-dashboard-webhook.yml
+│   │   │       ├── central-dashboard-webhook-linux.yml
+│   │   │       ├── central-dashboard-webhook-windows-macos.yml
+│   │   │       └── email.yml
+│   │   └── templates/
+│   │       └── prod/
+│   │           └── high-authority-notification.tmpl
+│   │
+│   ├── postgres/
+│   │   ├── postgresql-dev.conf
+│   │   ├── postgresql-test.conf
+│   │   └── postgresql-prod.conf
+│   │
+│   ├── redis/
+│   │   ├── redis-dev.conf
+│   │   ├── redis-test.conf
+│   │   └── redis-prod.conf
+│   │
+│   ├── k6/
+│   │   ├── README.md
+│   │   ├── Dockerfile
+│   │   └── k6.env.example
+│   │
+│   ├── pact-broker/
+│   │   ├── README.md
+│   │   └── pact-broker.yml
+│   │
+│   ├── stubs/
+│   │   ├── README.md
+│   │   ├── gmail-smtp-stub/
+│   │   │   ├── Dockerfile
+│   │   │   └── config.yml
+│   │   └── android-sms-stub/
+│   │       ├── Dockerfile
+│   │       └── config.yml
+│   │
+│   ├── config/
+│   │   ├── README.md
+│   │   ├── env-matrix.md
+│   │   ├── validate.sh
+│   │   ├── validate.ps1
+│   │   ├── schema/
+│   │   │   ├── env.schema.json
+│   │   │   ├── provider.schema.json
+│   │   │   ├── database.schema.json
+│   │   │   └── maintenance.schema.json
+│   │   ├── templates/
+│   │   │   ├── env.template
+│   │   │   ├── provider.template.yml
+│   │   │   └── maintenance.template.yml
+│   │   ├── providers/
+│   │   │   ├── simulator.provider.yml
+│   │   │   ├── razorpay.provider.yml
+│   │   │   └── stripe.provider.yml
+│   │   ├── cloud/
+│   │   │   ├── laptop.cloud.yml
+│   │   │   ├── oracle-cloud.cloud.yml
+│   │   │   ├── aws.cloud.yml
+│   │   │   └── cloud-validate.sh
+│   │   ├── maintenance/
+│   │   │   ├── maintenance.dev.yml
+│   │   │   ├── maintenance.test.yml
+│   │   │   ├── maintenance.prod.yml
+│   │   │   ├── maintenance-state.json
+│   │   │   ├── internal-tokens.json
+│   │   │   ├── apply-maintenance.sh
+│   │   │   ├── apply-maintenance.ps1
+│   │   │   └── README.md
+│   │   └── launcher/
+│   │       ├── minimum-specs.json
+│   │       └── mismatch-messages.json
+│   │
+│   ├── maintenance-page/
+│   │   ├── README.md
+│   │   ├── index.html
+│   │   ├── style.css
+│   │   └── logo.svg
+│   │
+│   ├── tailscale/
+│   │   ├── README.md
+│   │   └── acl.json
+│   │
+│   ├── secrets/
+│   │   ├── dev/
+│   │   │   └── .gitkeep
+│   │   ├── test/
+│   │   │   └── .gitkeep
+│   │   └── prod/
+│   │       ├── .gitkeep
+│   │       └── README.md
+│   │
+│   ├── cron/
+│   │   ├── README.md
+│   │   └── sris-schedules.cron
+│   │
+│   ├── systemd/
+│   │   ├── README.md
+│   │   ├── sris-retention-sweep.service
+│   │   ├── sris-retention-sweep.timer
+│   │   ├── sris-backup.service
+│   │   ├── sris-backup.timer
+│   │   ├── sris-maintenance-scheduler.service
+│   │   └── sris-maintenance-scheduler.timer
+│   │
+│   ├── backup/
+│   │   ├── README.md
+│   │   └── data/
+│   │       └── .gitkeep
+│   │
+│   └── exporters/
+│       ├── README.md
+│       ├── postgres_exporter/
+│       │   └── queries.yaml
+│       ├── redis_exporter/
+│       │   └── config.yml
+│       └── node_exporter/
+│           └── .gitkeep
+│
+├── sris-launcher/
+│   ├── README.md
+│   ├── CHANGELOG.md
+│   ├── VERSION
+│   ├── CODEOWNERS
+│   ├── SECURITY.md
+│   ├── CONTRIBUTING.md
+│   ├── .dockerignore
+│   ├── Dockerfile
+│   │
+│   ├── java-ui/
+│   │   ├── pom.xml
+│   │   ├── mvnw
+│   │   ├── mvnw.cmd
+│   │   ├── Dockerfile
+│   │   ├── .mvn/
+│   │   │   ├── jvm.config
+│   │   │   └── wrapper/
+│   │   │       ├── maven-wrapper.properties
+│   │   │       └── maven-wrapper.jar
+│   │   ├── src/
+│   │   │   ├── main/
+│   │   │   │   ├── java/
+│   │   │   │   │   ├── module-info.java
+│   │   │   │   │   └── com/
+│   │   │   │   │       └── sarathi/
+│   │   │   │   │           └── sris/
+│   │   │   │   │               └── launcher/
+│   │   │   │   │                   ├── LauncherApplication.java
+│   │   │   │   │                   ├── LauncherWindow.java
+│   │   │   │   │                   ├── bridge/
+│   │   │   │   │                   │   ├── PythonBridge.java
+│   │   │   │   │                   │   ├── PythonExecutableResolver.java
+│   │   │   │   │                   │   ├── JsonRpcClient.java
+│   │   │   │   │                   │   ├── JsonRpcTransport.java
+│   │   │   │   │                   │   ├── BridgeProtocolVersion.java
+│   │   │   │   │                   │   └── DeadlineStreamListener.java
+│   │   │   │   │                   ├── pages/
+│   │   │   │   │                   │   ├── WelcomePage.java
+│   │   │   │   │                   │   ├── DeviceScanPage.java
+│   │   │   │   │                   │   ├── DeviceMismatchPage.java
+│   │   │   │   │                   │   ├── PreviousDeviceVerifyPage.java
+│   │   │   │   │                   │   ├── IntegrityCheckPage.java
+│   │   │   │   │                   │   ├── LoginPage.java
+│   │   │   │   │                   │   ├── FirstRunSetupPage.java
+│   │   │   │   │                   │   ├── RegistrationDeadlineWarningPage.java
+│   │   │   │   │                   │   ├── AutoDeletePage.java
+│   │   │   │   │                   │   ├── ServerStartPage.java
+│   │   │   │   │                   │   ├── HealthDashboardPage.java
+│   │   │   │   │                   │   ├── MaintenancePage.java
+│   │   │   │   │                   │   ├── DiagnosticsPage.java
+│   │   │   │   │                   │   ├── RecoveryEntryPage.java
+│   │   │   │   │                   │   ├── RecoveryBiometricPage.java
+│   │   │   │   │                   │   ├── RecoveryDeveloperKeyPage.java
+│   │   │   │   │                   │   ├── RecoveryHardwareKeyPage.java
+│   │   │   │   │                   │   ├── RecoverySuccessPage.java
+│   │   │   │   │                   │   ├── UpdateAvailablePage.java
+│   │   │   │   │                   │   ├── SettingsPage.java
+│   │   │   │   │                   │   ├── AutofixPage.java
+│   │   │   │   │                   │   ├── BiometricReenrollPage.java
+│   │   │   │   │                   │   └── ConfirmProdModal.java
+│   │   │   │   │                   ├── components/
+│   │   │   │   │                   │   ├── SpecCompareTable.java
+│   │   │   │   │                   │   ├── DeadlineCountdown.java
+│   │   │   │   │                   │   ├── ProgressStream.java
+│   │   │   │   │                   │   ├── HealthCard.java
+│   │   │   │   │                   │   ├── TamperAlert.java
+│   │   │   │   │                   │   ├── RecoveryProgress.java
+│   │   │   │   │                   │   ├── EmergencyStopButton.java
+│   │   │   │   │                   │   ├── PreflightReportTable.java
+│   │   │   │   │                   │   ├── AutofixProgress.java
+│   │   │   │   │                   │   ├── EnvSwitcher.java
+│   │   │   │   │                   │   ├── MaintenanceScheduler.java
+│   │   │   │   │                   │   ├── ElevationBanner.java
+│   │   │   │   │                   │   └── Toast.java
+│   │   │   │   │                   └── styles/
+│   │   │   │   │                       ├── main.css
+│   │   │   │   │                       └── theme.properties
+│   │   │   │   └── resources/
+│   │   │   │       ├── logback.xml
+│   │   │   │       ├── application.properties
+│   │   │   │       ├── launcher.exe.manifest
+│   │   │   │       ├── META-INF/
+│   │   │   │       │   └── MANIFEST.MF
+│   │   │   │       └── com/
+│   │   │   │           └── sarathi/
+│   │   │   │               └── sris/
+│   │   │   │                   └── launcher/
+│   │   │   │                       └── ui/
+│   │   │   │                           ├── icons/
+│   │   │   │                           │   ├── logo.png
+│   │   │   │                           │   ├── check-green.png
+│   │   │   │                           │   ├── check-red.png
+│   │   │   │                           │   ├── check-warn.png
+│   │   │   │                           │   ├── fingerprint.png
+│   │   │   │                           │   └── placeholder.png
+│   │   │   │                           └── fonts/
+│   │   │   │                               ├── Inter-Regular.ttf
+│   │   │   │                               └── OFL.txt
+│   │   │   └── test/
+│   │   │       └── java/
+│   │   │           └── com/
+│   │   │               └── sarathi/
+│   │   │                   └── sris/
+│   │   │                       └── launcher/
+│   │   │                           ├── bridge/
+│   │   │                           │   ├── JsonRpcClientTest.java
+│   │   │                           │   └── BridgeProtocolVersionTest.java
+│   │   │                           ├── pages/
+│   │   │                           │   ├── LoginPageTest.java
+│   │   │                           │   └── HealthDashboardPageTest.java
+│   │   │                           └── smoke/
+│   │   │                               └── LauncherBootTest.java
+│   │   │
+│   │   ├── python-engine/
+│   │   │   ├── pyproject.toml
+│   │   │   ├── requirements.txt
+│   │   │   ├── requirements-dev.txt
+│   │   │   ├── ruff.toml
+│   │   │   ├── mypy.ini
+│   │   │   ├── pyinstaller.spec
+│   │   │   ├── .python-version
+│   │   │   ├── .gitignore
+│   │   │   ├── Dockerfile
+│   │   │   └── src/
+│   │   │       └── sris_launcher_engine/
+│   │   │           ├── __init__.py
+│   │   │           ├── __main__.py
+│   │   │           ├── main.py
+│   │   │           ├── config.py
+│   │   │           ├── constants.py
+│   │   │           ├── hidden_imports.py
+│   │   │           ├── README.md
+│   │   │           ├── rpc/
+│   │   │           │   ├── __init__.py
+│   │   │           │   ├── server.py
+│   │   │           │   ├── router.py
+│   │   │           │   └── protocol.py
+│   │   │           ├── api/
+│   │   │           │   ├── __init__.py
+│   │   │           │   ├── http_server.py
+│   │   │           │   ├── http_bootstrap.py
+│   │   │           │   ├── alert_receiver.py
+│   │   │           │   ├── health_endpoint.py
+│   │   │           │   ├── version_endpoint.py
+│   │   │           │   ├── auth_middleware.py
+│   │   │           │   └── token_provisioner.py
+│   │   │           ├── elevation/
+│   │   │           │   ├── __init__.py
+│   │   │           │   ├── elevation_service.py
+│   │   │           │   ├── windows_elevation.py
+│   │   │           │   ├── macos_elevation.py
+│   │   │           │   ├── linux_elevation.py
+│   │   │           │   ├── privilege_policy.py
+│   │   │           │   ├── privilege_policy.json
+│   │   │           │   ├── privilege_policy.schema.json
+│   │   │           │   ├── privileged_audit.py
+│   │   │           │   ├── dangerous_operation_guard.py
+│   │   │           │   └── README.md
+│   │   │           ├── integrity/
+│   │   │           │   ├── __init__.py
+│   │   │           │   ├── manifest_loader.py
+│   │   │           │   ├── manifest_recovery.py
+│   │   │           │   ├── hash_verifier.py
+│   │   │           │   ├── signature_verifier.py
+│   │   │           │   ├── tamper_handler.py
+│   │   │           │   └── README.md
+│   │   │           ├── device/
+│   │   │           │   ├── __init__.py
+│   │   │           │   ├── device_fingerprint.py
+│   │   │           │   ├── device_matcher.py
+│   │   │           │   ├── device_registry.py
+│   │   │           │   ├── hardware_spec_scanner.py
+│   │   │           │   ├── software_spec_scanner.py
+│   │   │           │   ├── spec_matcher.py
+│   │   │           │   └── README.md
+│   │   │           ├── preflight/
+│   │   │           │   ├── __init__.py
+│   │   │           │   ├── checks_registry.py
+│   │   │           │   ├── README.md
+│   │   │           │   ├── system/
+│   │   │           │   │   ├── __init__.py
+│   │   │           │   │   ├── os_detector.py
+│   │   │           │   │   ├── os_version_checker.py
+│   │   │           │   │   ├── hardware_checker.py
+│   │   │           │   │   ├── virtualization_checker.py
+│   │   │           │   │   ├── kernel_checker.py
+│   │   │           │   │   ├── clock_sync_checker.py
+│   │   │           │   │   └── disk_encryption/
+│   │   │           │   │       ├── __init__.py
+│   │   │           │   │       ├── windows_bitlocker.py
+│   │   │           │   │       ├── macos_filevault.py
+│   │   │           │   │       ├── linux_luks.py
+│   │   │           │   │       └── dispatcher.py
+│   │   │           │   ├── software/
+│   │   │           │   │   ├── __init__.py
+│   │   │           │   │   ├── java_checker.py
+│   │   │           │   │   ├── node_checker.py
+│   │   │           │   │   ├── python_checker.py
+│   │   │           │   │   ├── docker_checker.py
+│   │   │           │   │   ├── wsl2_checker.py
+│   │   │           │   │   └── git_checker.py
+│   │   │           │   ├── resource/
+│   │   │           │   │   ├── __init__.py
+│   │   │           │   │   ├── ram_checker.py
+│   │   │           │   │   ├── disk_checker.py
+│   │   │           │   │   ├── cpu_checker.py
+│   │   │           │   │   ├── resource_baseline_checker.py
+│   │   │           │   │   └── memory_budget_checker.py
+│   │   │           │   ├── security/
+│   │   │           │   │   ├── __init__.py
+│   │   │           │   │   ├── antivirus/
+│   │   │           │   │   │   ├── __init__.py
+│   │   │           │   │   │   ├── windows_defender.py
+│   │   │           │   │   │   ├── macos_xprotect.py
+│   │   │           │   │   │   ├── linux_clamav.py
+│   │   │           │   │   │   └── dispatcher.py
+│   │   │           │   │   ├── firewall/
+│   │   │           │   │   │   ├── __init__.py
+│   │   │           │   │   │   ├── windows_firewall.py
+│   │   │           │   │   │   ├── macos_pf.py
+│   │   │           │   │   │   ├── linux_ufw.py
+│   │   │           │   │   │   └── dispatcher.py
+│   │   │           │   │   ├── rootkit/
+│   │   │           │   │   │   ├── __init__.py
+│   │   │           │   │   │   ├── rootkit_scanner_windows.py
+│   │   │           │   │   │   ├── rootkit_scanner_macos.py
+│   │   │           │   │   │   └── rootkit_scanner_linux.py
+│   │   │           │   │   ├── open_port/
+│   │   │           │   │   │   ├── __init__.py
+│   │   │           │   │   │   ├── windows_netstat.py
+│   │   │           │   │   │   ├── macos_lsof.py
+│   │   │           │   │   │   ├── linux_ss.py
+│   │   │           │   │   │   └── dispatcher.py
+│   │   │           │   │   ├── suspicious_process/
+│   │   │           │   │   │   ├── __init__.py
+│   │   │           │   │   │   ├── windows_tasklist.py
+│   │   │           │   │   │   ├── macos_ps.py
+│   │   │           │   │   │   ├── linux_ps.py
+│   │   │           │   │   │   └── dispatcher.py
+│   │   │           │   │   ├── malware_scanner.py
+│   │   │           │   │   ├── secrets_scanner.py
+│   │   │           │   │   └── signed_binary_checker.py
+│   │   │           │   ├── network/
+│   │   │           │   │   ├── __init__.py
+│   │   │           │   │   ├── internet_checker.py
+│   │   │           │   │   ├── docker_daemon_checker.py
+│   │   │           │   │   ├── port_availability_checker.py
+│   │   │           │   │   └── network_conflict_checker.py
+│   │   │           │   └── repo/
+│   │   │           │       ├── __init__.py
+│   │   │           │       ├── repo_integrity_checker.py
+│   │   │           │       ├── env_file_checker.py
+│   │   │           │       ├── certificate_checker.py
+│   │   │           │       └── contract_checker.py
+│   │   │           ├── autofix/
+│   │   │           │   ├── __init__.py
+│   │   │           │   ├── autofix_orchestrator.py
+│   │   │           │   ├── fix_runner.py
+│   │   │           │   ├── installers/
+│   │   │           │   │   ├── __init__.py
+│   │   │           │   │   ├── java_installer.py
+│   │   │           │   │   ├── node_installer.py
+│   │   │           │   │   ├── python_installer.py
+│   │   │           │   │   ├── docker_installer.py
+│   │   │           │   │   ├── wsl2_installer.py
+│   │   │           │   │   ├── git_installer.py
+│   │   │           │   │   └── antivirus_installer.py
+│   │   │           │   └── README.md
+│   │   │           ├── auth/
+│   │   │           │   ├── __init__.py
+│   │   │           │   ├── launcher_auth_service.py
+│   │   │           │   ├── totp_service.py
+│   │   │           │   ├── machine_fingerprint_service.py
+│   │   │           │   ├── session_store.py
+│   │   │           │   ├── first_run_setup.py
+│   │   │           │   └── README.md
+│   │   │           ├── crypto/
+│   │   │           │   ├── __init__.py
+│   │   │           │   ├── shamir.py
+│   │   │           │   ├── tpm_binding.py
+│   │   │           │   ├── tpm/
+│   │   │           │   │   ├── __init__.py
+│   │   │           │   │   ├── windows_tbs_backend.py
+│   │   │           │   │   ├── macos_secure_enclave_backend.py
+│   │   │           │   │   └── linux_tss_backend.py
+│   │   │           │   ├── hardware_share.py
+│   │   │           │   ├── biometric_share.py
+│   │   │           │   ├── developer_share.py
+│   │   │           │   ├── master_key.py
+│   │   │           │   ├── signature.py
+│   │   │           │   └── README.md
+│   │   │           ├── biometric/
+│   │   │           │   ├── __init__.py
+│   │   │           │   ├── biometric_provider_interface.py
+│   │   │           │   ├── windows_hello_provider.py
+│   │   │           │   ├── macos_touch_id_provider.py
+│   │   │           │   ├── libfprint_provider.py
+│   │   │           │   ├── retina_provider_interface.py
+│   │   │           │   ├── biometric_enroller.py
+│   │   │           │   ├── biometric_reenroller.py
+│   │   │           │   ├── biometric_verifier.py
+│   │   │           │   ├── storage/
+│   │   │           │   │   ├── __init__.py
+│   │   │           │   │   ├── windows_hello_storage.py
+│   │   │           │   │   ├── macos_keychain_storage.py
+│   │   │           │   │   └── linux_secret_service_storage.py
+│   │   │           │   ├── template_store.py
+│   │   │           │   └── README.md
+│   │   │           ├── recovery/
+│   │   │           │   ├── __init__.py
+│   │   │           │   ├── recovery_orchestrator.py
+│   │   │           │   ├── fallback_availability.py
+│   │   │           │   ├── fallback_biometric.py
+│   │   │           │   ├── fallback_developer.py
+│   │   │           │   ├── fallback_hardware.py
+│   │   │           │   ├── recovery_reference_code.py
+│   │   │           │   ├── recovery_reference_code.format.md
+│   │   │           │   ├── recovery_session.py
+│   │   │           │   ├── recovery_password_policy.py
+│   │   │           │   ├── recovery_audit.py
+│   │   │           │   ├── recovery_email.py
+│   │   │           │   └── README.md
+│   │   │           ├── audit/
+│   │   │           │   ├── __init__.py
+│   │   │           │   ├── hash_chained_log.py
+│   │   │           │   ├── audit_entry.schema.json
+│   │   │           │   ├── audit_verifier.py
+│   │   │           │   ├── audit_exporter.py
+│   │   │           │   ├── audit_email_notifier.py
+│   │   │           │   └── README.md
+│   │   │           ├── launcher/
+│   │   │           │   ├── __init__.py
+│   │   │           │   ├── env_selector.py
+│   │   │           │   ├── env_file_resolver.py
+│   │   │           │   ├── docker_launcher.py
+│   │   │           │   ├── docker_preflight_guard.py
+│   │   │           │   ├── compose_command_builder.py
+│   │   │           │   ├── compose_output_parser.py
+│   │   │           │   ├── health_poller.py
+│   │   │           │   ├── maintenance_toggle.py
+│   │   │           │   ├── maintenance_scheduler.py
+│   │   │           │   ├── maintenance_broadcaster.py
+│   │   │           │   ├── stop_all.py
+│   │   │           │   └── README.md
+│   │   │           ├── install/
+│   │   │           │   ├── __init__.py
+│   │   │           │   ├── offline_installer.py
+│   │   │           │   ├── bundle_verifier.py
+│   │   │           │   ├── bundle_reader.py
+│   │   │           │   ├── pen_drive_detector.py
+│   │   │           │   ├── source_locator.py
+│   │   │           │   ├── secure_temp_folder.py
+│   │   │           │   ├── temp_to_final_mover.py
+│   │   │           │   ├── permissions.py
+│   │   │           │   └── README.md
+│   │   │           ├── registration/
+│   │   │           │   ├── __init__.py
+│   │   │           │   ├── deadline_manager.py
+│   │   │           │   ├── deadline_watchdog.py
+│   │   │           │   ├── deadline_streamer.py
+│   │   │           │   ├── attempt_counter.py
+│   │   │           │   ├── attempt_state.schema.json
+│   │   │           │   ├── attempt_state.example.json
+│   │   │           │   ├── attempt_state.default.json
+│   │   │           │   ├── instant_reboot.py
+│   │   │           │   ├── boot_time_cleaner.py
+│   │   │           │   ├── boot_cleaner_registrar.py
+│   │   │           │   ├── boot_cleaner_deregistrar.py
+│   │   │           │   ├── windows_task_registrar.py
+│   │   │           │   ├── cleanup_executor.py
+│   │   │           │   ├── install_manifest.py
+│   │   │           │   ├── cleanup_state.json
+│   │   │           │   ├── cleanup_state.schema.json
+│   │   │           │   └── README.md
+│   │   │           ├── update/
+│   │   │           │   ├── __init__.py
+│   │   │           │   ├── update_checker.py
+│   │   │           │   ├── update_downloader.py
+│   │   │           │   ├── update_verifier.py
+│   │   │           │   ├── update_installer.py
+│   │   │           │   ├── update_rollback.py
+│   │   │           │   ├── launcher_version_history.py
+│   │   │           │   ├── new_binary_smoke_test.py
+│   │   │           │   ├── update_server_config.py
+│   │   │           │   └── README.md
+│   │   │           ├── diagnostics/
+│   │   │           │   ├── __init__.py
+│   │   │           │   ├── log_collector.py
+│   │   │           │   ├── state_inspector.py
+│   │   │           │   ├── privacy_scrubber.py
+│   │   │           │   └── README.md
+│   │   │           └── tests/
+│   │   │               ├── __init__.py
+│   │   │               ├── unit/
+│   │   │               │   ├── __init__.py
+│   │   │               │   ├── crypto/
+│   │   │               │   │   ├── __init__.py
+│   │   │               │   │   ├── shamir_test.py
+│   │   │               │   │   ├── hardware_share_test.py
+│   │   │               │   │   └── tpm/
+│   │   │               │   │       └── __init__.py
+│   │   │               │   ├── recovery/
+│   │   │               │   │   ├── __init__.py
+│   │   │               │   │   ├── fallback_availability_test.py
+│   │   │               │   │   ├── fallback_biometric_test.py
+│   │   │               │   │   ├── fallback_developer_test.py
+│   │   │               │   │   ├── fallback_hardware_test.py
+│   │   │               │   │   └── recovery_password_policy_test.py
+│   │   │               │   ├── preflight/
+│   │   │               │   │   ├── __init__.py
+│   │   │               │   │   ├── security/
+│   │   │               │   │   │   ├── __init__.py
+│   │   │               │   │   │   ├── antivirus/
+│   │   │               │   │   │   │   ├── __init__.py
+│   │   │               │   │   │   │   └── antivirus_checker_test.py
+│   │   │               │   │   │   ├── firewall/
+│   │   │               │   │   │   │   └── __init__.py
+│   │   │               │   │   │   ├── rootkit/
+│   │   │               │   │   │   │   └── __init__.py
+│   │   │               │   │   │   ├── open_port/
+│   │   │               │   │   │   │   └── __init__.py
+│   │   │               │   │   │   └── suspicious_process/
+│   │   │               │   │   │       └── __init__.py
+│   │   │               │   │   └── system/
+│   │   │               │   │       ├── __init__.py
+│   │   │               │   │       └── disk_encryption/
+│   │   │               │   │           └── __init__.py
+│   │   │               │   ├── biometric/
+│   │   │               │   │   ├── __init__.py
+│   │   │               │   │   └── storage/
+│   │   │               │   │       └── __init__.py
+│   │   │               │   ├── autofix/
+│   │   │               │   │   ├── __init__.py
+│   │   │               │   │   └── autofix_orchestrator_test.py
+│   │   │               │   ├── auth/
+│   │   │               │   │   ├── __init__.py
+│   │   │               │   │   └── launcher_auth_test.py
+│   │   │               │   └── registration/
+│   │   │               │       ├── __init__.py
+│   │   │               │       └── deadline_manager_test.py
+│   │   │               ├── integration/
+│   │   │               │   ├── __init__.py
+│   │   │               │   ├── recovery_full_cascade_test.py
+│   │   │               │   ├── recovery_no_lockout_test.py
+│   │   │               │   ├── audit_chain_integrity_test.py
+│   │   │               │   ├── biometric_fingerprint_test.py
+│   │   │               │   ├── biometric_retina_simulated_test.py
+│   │   │               │   ├── preflight_full_audit_test.py
+│   │   │               │   ├── autofix_full_test.py
+│   │   │               │   ├── login_lockout_test.py
+│   │   │               │   ├── deadline_persistence_test.py
+│   │   │               │   ├── deadline_auto_delete_test.py
+│   │   │               │   └── third_attempt_immediate_wipe_test.py
+│   │   │               └── fixtures/
+│   │   │                   ├── sample_specs.json
+│   │   │                   └── sample_traffic.json
+│   │   │
+│   │   ├── bridge/
+│   │   │   ├── README.md
+│   │   │   ├── protocol-version.json
+│   │   │   ├── VERSIONING_POLICY.md
+│   │   │   ├── schema/
+│   │   │   │   ├── preflight.request.schema.json
+│   │   │   │   ├── preflight.response.schema.json
+│   │   │   │   ├── device_scan.request.schema.json
+│   │   │   │   ├── device_scan.response.schema.json
+│   │   │   │   ├── login.request.schema.json
+│   │   │   │   ├── login.response.schema.json
+│   │   │   │   ├── launch.request.schema.json
+│   │   │   │   ├── launch.response.schema.json
+│   │   │   │   ├── health.request.schema.json
+│   │   │   │   ├── health.response.schema.json
+│   │   │   │   ├── maintenance.request.schema.json
+│   │   │   │   ├── maintenance.response.schema.json
+│   │   │   │   ├── recovery.request.schema.json
+│   │   │   │   ├── recovery.response.schema.json
+│   │   │   │   ├── environment_mode.request.schema.json
+│   │   │   │   ├── environment_mode.response.schema.json
+│   │   │   │   └── deadline.event.schema.json
+│   │   │   ├── generated/
+│   │   │   │   ├── README.md
+│   │   │   │   └── .gitkeep
+│   │   │   └── examples/
+│   │   │       ├── preflight.request.example.json
+│   │   │       ├── preflight.response.example.json
+│   │   │       └── login.request.example.json
+│   │   │
+│   │   ├── packaging/
+│   │   │   ├── build_bundle.py
+│   │   │   ├── sign_bundle.py
+│   │   │   ├── generate_manifest.py
+│   │   │   ├── release.py
+│   │   │   ├── sign_release.py
+│   │   │   ├── install_system_service.py
+│   │   │   └── README.md
+│   │   │
+│   │   ├── installer/
+│   │   │   ├── README.md
+│   │   │   ├── windows/
+│   │   │   │   ├── install.bat
+│   │   │   │   ├── install.ps1
+│   │   │   │   ├── install-service.ps1
+│   │   │   │   ├── uninstall.ps1
+│   │   │   │   └── checksums.txt
+│   │   │   ├── macos/
+│   │   │   │   ├── install.sh
+│   │   │   │   ├── install-agent.sh
+│   │   │   │   ├── uninstall.sh
+│   │   │   │   └── checksums.txt
+│   │   │   ├── linux/
+│   │   │   │   ├── install.sh
+│   │   │   │   ├── install-service.sh
+│   │   │   │   ├── uninstall.sh
+│   │   │   │   └── checksums.txt
+│   │   │   └── bundle/
+│   │   │       ├── bundle.toml
+│   │   │       ├── bundle.sig
+│   │   │       ├── bundle.sha256
+│   │   │       ├── build_bundle.py
+│   │   │       ├── sign_bundle.py
+│   │   │       ├── EXCLUDE_LIST.md
+│   │   │       └── README.md
+│   │   │
+│   │   ├── build-keys/
+│   │   │   ├── generate-developer-share.py
+│   │   │   ├── developer-public-key.pem
+│   │   │   ├── update-signing-public-key.pem
+│   │   │   ├── README.md
+│   │   │   └── .gitignore
+│   │   │
+│   │   ├── tools/
+│   │   │   ├── developer-recovery-cli/
+│   │   │   │   ├── README.md
+│   │   │   │   ├── main.py
+│   │   │   │   ├── hsm_connector.py
+│   │   │   │   └── pyproject.toml
+│   │   │   └── verify-manifest/
+│   │   │       ├── README.md
+│   │   │       ├── verify.py
+│   │   │       └── pyproject.toml
+│   │   │
+│   │   ├── config/
+│   │   │   ├── launcher-config.toml
+│   │   │   ├── update_server.toml
+│   │   │   └── minimum-specs.json
+│   │   │
+│   │   ├── service/
+│   │   │   ├── launcher-service.service
+│   │   │   ├── launcher-service.plist
+│   │   │   ├── launcher-service.xml
+│   │   │   ├── cleanup-on-boot.service
+│   │   │   ├── cleanup-on-boot.plist
+│   │   │   ├── cleanup-on-boot.daemon.plist
+│   │   │   └── cleanup-on-boot.xml
+│   │   │
+│   │   ├── docs/
+│   │   │   ├── USER_GUIDE.md
+│   │   │   ├── PREFLIGHT_CHECKS_FULL.md
+│   │   │   ├── AUTOFIX_REFERENCE.md
+│   │   │   ├── SECURITY_MODEL.md
+│   │   │   ├── HIGH_AUTHORITY_DASHBOARD.md
+│   │   │   ├── RECOVERY_AND_ROOT_OF_TRUST.md
+│   │   │   ├── ANTI_THEFT_THREE_ATTEMPT_RULE.md
+│   │   │   ├── BIOMETRIC_HARDWARE_REQUIREMENTS.md
+│   │   │   ├── DEVELOPER_RECOVERY_RUNBOOK.md
+│   │   │   ├── PROCESS_MODEL.md
+│   │   │   ├── SYSTEM_SERVICE_LIFECYCLE.md
+│   │   │   └── TROUBLESHOOTING.md
+│   │   │
+│   │   └── assets/
+│   │       ├── icon.ico
+│   │       ├── icon.icns
+│   │       ├── icon.png
+│   │       ├── splash.png
+│   │       └── source/
+│   │           ├── icon.svg
+│   │           ├── splash.svg
+│   │           ├── build-icons.sh
+│   │           └── README.md
+│   │
+├── scripts/
+│   ├── README.md
+│   ├── git-hooks/
+│   │   ├── pre-commit-exec-bit.sh
+│   │   └── README.md
+│   ├── bash/
+│   │   ├── setup/
+│   │   │   ├── README.md
+│   │   │   ├── setup-dev.sh
+│   │   │   ├── setup-test.sh
+│   │   │   ├── setup-prod.sh
+│   │   │   ├── setup-ssl.sh
+│   │   │   ├── setup-tailscale.sh
+│   │   │   └── setup-git-hooks.sh
+│   │   ├── dev/
+│   │   │   ├── README.md
+│   │   │   ├── up.sh
+│   │   │   ├── down.sh
+│   │   │   ├── logs.sh
+│   │   │   ├── reset-db.sh
+│   │   │   ├── seed.sh
+│   │   │   └── health.sh
+│   │   ├── test/
+│   │   │   ├── README.md
+│   │   │   ├── test-all.sh
+│   │   │   ├── test-java.sh
+│   │   │   ├── test-node.sh
+│   │   │   ├── test-python.sh
+│   │   │   ├── test-contracts.sh
+│   │   │   ├── test-integration.sh
+│   │   │   ├── test-load.sh
+│   │   │   ├── test-security.sh
+│   │   │   ├── test-boundaries.sh
+│   │   │   └── test-e2e.sh
+│   │   ├── ci/
+│   │   │   ├── README.md
+│   │   │   ├── check-coverage.sh
+│   │   │   ├── check-licences.sh
+│   │   │   ├── check-boundary-guard.sh
+│   │   │   ├── check-naming-convention.sh
+│   │   │   ├── check-env-separation.sh
+│   │   │   ├── check-no-hardcoded-hosts.sh
+│   │   │   ├── generate-clients.sh
+│   │   │   ├── generate-tree.sh
+│   │   │   └── generate-sbom.sh
+│   │   ├── deployment/
+│   │   │   ├── README.md
+│   │   │   ├── deploy-dev.sh
+│   │   │   ├── deploy-test.sh
+│   │   │   ├── deploy-prod.sh
+│   │   │   ├── validate-cloud-target.sh
+│   │   │   ├── rollback.sh
+│   │   │   └── migrate.sh
+│   │   ├── maintenance/
+│   │   │   ├── README.md
+│   │   │   ├── backup.sh
+│   │   │   ├── restore.sh
+│   │   │   ├── rotate-secrets.sh
+│   │   │   └── retention-sweep.sh
+│   │   ├── ops/
+│   │   │   ├── README.md
+│   │   │   ├── emergency-scale-down.sh
+│   │   │   ├── drain-node.sh
+│   │   │   ├── verify-backup.sh
+│   │   │   └── capture-diagnostics.sh
+│   │   └── analysis/
+│   │       ├── README.md
+│   │       ├── python-anomaly-report.sh
+│   │       └── load-test-report.sh
+│   └── powershell/
+│       ├── README.md
+│       ├── setup/
+│       │   ├── setup-dev.ps1
+│       │   ├── setup-test.ps1
+│       │   └── setup-prod.ps1
+│       ├── dev/
+│       │   ├── up.ps1
+│       │   ├── down.ps1
+│       │   ├── logs.ps1
+│       │   ├── reset-db.ps1
+│       │   ├── seed.ps1
+│       │   └── health.ps1
+│       ├── test/
+│       │   ├── test-all.ps1
+│       │   └── test-load.ps1
+│       └── deployment/
+│           ├── deploy-dev.ps1
+│           ├── deploy-test.ps1
+│           ├── deploy-prod.ps1
+│           └── validate-cloud-target.ps1
+│
+└── tests/
+    ├── README.md
+    ├── integration/
+    │   ├── README.md
+    │   ├── end-to-end-booking.test.ts
+    │   ├── fault-isolation.test.ts
+    │   ├── recovery.test.ts
+    │   ├── env-isolation.test.ts
+    │   ├── config-only-deploy.test.ts
+    │   ├── provider-config-only-swap.test.ts
+    │   ├── laptop-to-cloud-config-only.test.ts
+    │   ├── maintenance-dev-does-not-affect-prod.test.ts
+    │   ├── maintenance-window-activates.test.ts
+    │   ├── booking-to-notification.test.ts
+    │   ├── boundary-guard-self-test.sh
+    │   ├── naming-guard-self-test.sh
+    │   ├── tree-sync-self-test.sh
+    │   └── config-validate-self-test.sh
+    ├── chaos/
+    │   ├── README.md
+    │   └── fault-injection.test.ts
+    ├── migration/
+    │   ├── README.md
+    │   └── migration-dryrun.sh
+    ├── e2e/
+    │   ├── README.md
+    │   ├── playwright.config.ts
+    │   └── specs/
+    │       ├── customer-flow.spec.ts
+    │       ├── employee-flow.spec.ts
+    │       └── accessibility.spec.ts
+    ├── accessibility/
+    │   ├── README.md
+    │   └── axe-runner.ts
+    ├── contract/
+    │   ├── README.md
+    │   ├── pact-broker/
+    │   │   └── testcontainers-compose.yml
+    │   └── consumer-driven/
+    │       ├── s4-consumes-s2.pacttest.ts
+    │       └── s3-consumes-s2.pacttest.ts
+    ├── load/
+    │   ├── README.md
+    │   ├── k6/
+    │   │   ├── search-load.js
+    │   │   ├── auth-load.js
+    │   │   ├── booking-load.js
+    │   │   ├── memory-envelope.js
+    │   │   └── helpers/
+    │   │       ├── auth.js
+    │   │       └── data.js
+    │   └── results/
+    │       └── .gitkeep
+    └── security/
+        ├── README.md
+        ├── zap/
+        │   ├── baseline.conf
+        │   └── full-scan.conf
+        └── reports/
+            └── .gitkeep
+
+================================================================================
+SECTION 3 — VERIFICATION TABLE (continued from 3.3)
+================================================================================
+
+--------------------------------------------------------------------------------
+3.3 — File-type distribution (approximate)
+--------------------------------------------------------------------------------
+
+  Extension        Count    Dominant buckets
+  --------------- -------- ------------------------------------------
+  .md              ~600     docs/, launcher docs, READMEs everywhere
+  .java            ~365     services/java (s2, s3), sris-launcher/java-ui
+  .ts              ~350     services/node (s1, s4, s5, s6), clients/shared
+  .tsx             ~280     clients/web (customer-portal, employee-portal)
+  .yml / .yaml     ~250     .github/workflows, infra/compose, infra/prometheus
+  .py              ~290     services/python, sris-launcher/python-engine,
+                            sris-launcher/packaging, sris-launcher/tools
+  .kt              ~110     clients/mobile/android-sms-gateway
+  .sql              ~90     database/ (iam, master-data, reservation,
+                            notification, seed, initdb, expected-schema)
+  .json            ~120     bridge schemas, launcher configs, k6, package.json
+                            files, tsconfig, tsconfig.build, jest.config
+  .sh              ~60      scripts/bash, installer/{macos,linux},
+                            sris-launcher/installer, database/initdb,
+                            database/rollback, database/expected-schema
+  .ps1             ~25      scripts/powershell, sris-launcher/installer/windows
+                            infra/config/maintenance
+  .mmd              ~13     docs/wave-2-architecture/diagrams
+  .dart             ~60     clients/mobile/message-app/lib
+  .xml              ~15     android res, service defs, feature-flags configs
+  .css              ~10     clients web styles, maintenance-page
+  .html              ~3     docs/blueprint.html, infra/maintenance-page/index.html
+  .prisma            ~2     services/node/s1-iam/prisma, s6-notification/prisma
+  .toml              ~5     sris-launcher configs, bundle.toml, pyproject
+  .cfg               ~3     setup configs
+  .lock              ~8     package-lock.json, pubspec.lock
+  .pem               ~2     sris-launcher/build-keys
+  .tmpl              ~1     infra/alertmanager/templates/prod
+  .format.md         ~1     sris-launcher/python-engine/recovery
+  .envrc/.nvmrc etc  ~8     root dotfiles
+  .gitkeep         ~30      throughout (placeholders)
+  .gitignore       ~15      throughout
+  (no extension)   ~15      gradlew, mvnw, LICENSE, VERSION, CODEOWNERS
+  --------------- -------- ------------------------------------------
+  Approx total    ~2,707
+
+--------------------------------------------------------------------------------
+3.4 — Sanity checks (cross-references)
+--------------------------------------------------------------------------------
+
+  Cross-check 1 — Wave totals in docs/ sum to 236
+    22 (w0) + 17 (w1) + 30 (w2) + 55 (w3) + 18 (w4) + 48 (w5)
+    + 15 (w6) + 17 (w7) +  9 (w8) +  4 (w9) + 1 (blueprint.html)
+    = 236  ✓
+
+  Cross-check 2 — Service files sum
+    s2 (158) + s3 (199) + s1-iam (128) + s4 (81) + s5 (88)
+    + s6 (95) + s6-py-daemon (64)
+    = 813
+    + services/README.md (1) + java/README.md (1) + node/README.md (1)
+    + python/README.md (1)
+    = 817  ✓
+
+  Cross-check 3 — Client files sum
+    customer-portal (182) + employee-portal (189) + shared (81)
+    + web root (6) + android-sms-gateway (97) + message-app (103)
+    + mobile root (2) + clients root (2)
+    = 662  ✓
+
+  Cross-check 4 — Launcher files sum
+    java-ui (71) + python-engine (279) + bridge (25) + packaging (7)
+    + installer (21) + build-keys (5) + tools (7) + config (3)
+    + service (7) + docs (12) + assets (8) + root files (8)
+    = 453  ✓
+
+  Cross-check 5 — Infra files sum
+    docker (13) + compose (25) + nginx (28) + prometheus (19)
+    + grafana (28) + loki/promtail/tempo/otel (14) + alertmanager (9)
+    + postgres/redis (6) + k6/pact-broker/stubs (9) + config (28)
+    + maintenance-page (4) + tailscale/secrets/cron/systemd (17)
+    + backup/exporters (6) + README (1)
+    = 206  ✓
+
+  Cross-check 6 — Grand total sum
+    root (23) + .github (53) + docs (236) + clients (662)
+    + contracts (31) + database (109) + services (817)
+    + infra (206) + sris-launcher (453) + scripts (74) + tests (43)
+    = 2,707  ✓
+
+--------------------------------------------------------------------------------
+3.5 — Confidence notes / caveats
+--------------------------------------------------------------------------------
+
+  1. FILE COUNT (2,707) — high confidence.
+     Every leaf in the source tree has been enumerated exactly once.
+
+  2. FOLDER COUNT (~443, expanded) — medium confidence.
+     Exact number depends on how you count:
+       - Java/Kotlin package expansion: java/com/sarathi/sris/X = 5 folders
+       - Python subpackage expansion:   a/b/c/  = 3 folders
+       - Flutter path expansion:        lib/core/config = 3 folders
+       - TypeScript src/ paths:         src/data/prisma = 3 folders
+     If your reference collapsed these into 1 line each, subtract roughly
+     ~180 from the expanded total (~443 → ~260). Both are valid, just
+     different conventions.
+
+  3. APPROXIMATE FOLDER COUNTS for large buckets (marked with ~)
+     are due to nested package expansion in:
+       clients/     (many src/…/…/ paths in web and mobile)
+       services/    (java/com/sarathi/sris/… in s2, s3; node src/…/… in all)
+       infra/       (provisioning/, dashboards/{dev,test,prod}/, etc.)
+       sris-launcher/ (java/com/sarathi/sris/launcher + python packages)
+
+  4. DOTFILES count as files. If your reference ignores .gitkeep /
+     .gitignore / .env*.example, subtract ~55 from the total
+     (2,707 → ~2,652).
+
+  5. .gitkeep files (~30) are counted as real files. If you exclude them,
+     subtract ~30.
+
+  6. Duplicated names (README.md, index.ts, package.json, etc.) are
+     counted once per physical occurrence, not deduplicated.
+
+  7. The infra/secrets/{dev,test,prod}/.gitkeep files are counted as 3
+     files even though the folders are intentionally empty in the repo.
+
+================================================================================
+SECTION 4 — END OF DOCUMENT
+================================================================================
+
+  Summary:
+    Total files   : 2,707
+    Total folders : ~443 (expanded) / ~260 (collapsed) — both valid
+    Top bucket    : services/ (817 files, 30.2%)
+    Second bucket : clients/ (662 files, 24.5%)
+    Third bucket  : sris-launcher/ (453 files, 16.7%)
+
+  If your reference count matches 2,707 files exactly → done.
+  If it differs → tell me the delta and I will isolate the bucket.
+
+================================================================================
+                             END OF DOCUMENT
+================================================================================
